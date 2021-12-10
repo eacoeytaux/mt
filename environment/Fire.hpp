@@ -1,6 +1,7 @@
 #ifndef Fire_hpp
 #define Fire_hpp
 
+#include "mt.hpp"
 #include "Object.hpp"
 #include "Timer.hpp"
 

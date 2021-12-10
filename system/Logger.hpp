@@ -1,6 +1,8 @@
 #ifndef __Logger__
 #define __Logger__
 
+#include "SysIncludes.hpp"
+
 namespace mt {
     enum MESSAGE_TYPE {
         INFO_LOG = 0,

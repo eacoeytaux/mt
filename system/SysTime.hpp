@@ -1,19 +1,19 @@
 #ifndef SysTime_hpp
 #define SysTime_hpp
 
-#include "mt.hpp"
+#include "SysIncludes.hpp"
 
 namespace mt {
     class SysTime {
     public:
         SysTime();
-        SysTime(uint64_t ms);
+        SysTime(std::uint64_t ms);
         
-        uint64_t total_ms() const;
+        std::uint64_t total_ms() const;
         
-        uint64_t seconds() const;
-        uint64_t minutes() const;
-        uint64_t hours() const;
+        std::uint64_t seconds() const;
+        std::uint64_t minutes() const;
+        std::uint64_t hours() const;
         
         string timestamp(string delim = ":") const;
         string datestamp(string delim = "-") const;

@@ -1,6 +1,8 @@
 #ifndef mt_main_hpp
 #define mt_main_hpp
 
+#include "mt.hpp"
+
 namespace mt {
 
 class MTROGUE {

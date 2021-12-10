@@ -26,18 +26,15 @@ enum AXIS {
 
 //#define Coordinates std::vector<Coordinate>
 
-typedef float pixel; // TODO??
-//#define pixel float
-
 class Coordinate {
 public:
-    Coordinate(pixel x = 0, pixel y = 0);
+    Coordinate(float x = 0, float y = 0);
     
-    pixel x() const;
-    void x(pixel x);
+    float x() const;
+    void x(float x);
     
-    pixel y() const;
-    void y(pixel y);
+    float y() const;
+    void y(float y);
     
     float distance(const Coordinate &) const;
     
@@ -56,8 +53,8 @@ public:
     bool operator!=(const Coordinate &) const;
     
 private:
-    pixel m_x;
-    pixel m_y;
+    float m_x;
+    float m_y;
 };
 
 const Coordinate COORDINATE_POS_INFINITY(POS_INFINITY, POS_INFINITY);

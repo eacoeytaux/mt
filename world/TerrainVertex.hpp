@@ -1,6 +1,7 @@
 #ifndef TerrainVertex_hpp
 #define TerrainVertex_hpp
 
+#include "mt.hpp"
 #include "geometry.hpp"
 
 namespace mt {

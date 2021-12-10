@@ -1,6 +1,7 @@
 #ifndef Tree_hpp
 #define Tree_hpp
 
+#include "mt.hpp"
 #include "Object.hpp"
 
 namespace mt {

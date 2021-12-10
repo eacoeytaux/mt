@@ -30,8 +30,13 @@ void Mob::draw(const Camera & _camera) const {
 #endif
 }
 
+bool Mob::alive() const {
+    return m_alive;
+}
+
 void Mob::kill() {
     m_health.value(0);
+    m_alive = false;
 }
 
 int Mob::health() const {

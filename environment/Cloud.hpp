@@ -1,6 +1,7 @@
 #ifndef Cloud_hpp
 #define Cloud_hpp
 
+#include "mt.hpp"
 #include "Object.hpp"
 
 namespace mt {

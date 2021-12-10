@@ -1,6 +1,7 @@
 #ifndef Darkness_hpp
 #define Darkness_hpp
 
+#include "mt.hpp"
 #include "Visible.hpp"
 #include "Object.hpp"
 

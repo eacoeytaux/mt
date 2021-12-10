@@ -1,9 +1,8 @@
 #ifndef Player_hpp
 #define Player_hpp
 
+#include "mt.hpp"
 #include "Mob.hpp"
-
-#include "Timer.hpp"
 #include "Rope.hpp"
 
 namespace mt {
@@ -15,6 +14,9 @@ public:
     void update();
     void draw(const Camera &) const;
     void draw_reticle(const Camera &) const;
+    
+    void kill();
+    void hurt(int health);
     
     void moving_right(bool);
     void moving_left(bool);
@@ -30,9 +32,6 @@ public:
 private:
     void update_velocity();
     void move(const Vector &);
-    
-    void kill();
-    void hurt(int health);
     
     bool m_moving_right = false;
     bool m_moving_left = false;

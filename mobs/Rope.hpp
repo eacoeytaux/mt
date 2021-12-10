@@ -1,6 +1,7 @@
 #ifndef Rope_hpp
 #define Rope_hpp
 
+#include "mt.hpp"
 #include "Object.hpp"
 
 namespace mt {

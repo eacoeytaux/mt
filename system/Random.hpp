@@ -1,6 +1,8 @@
 #ifndef Random_hpp
 #define Random_hpp
 
+#include "SysIncludes.hpp"
+
 namespace mt {
 
 class Angle;

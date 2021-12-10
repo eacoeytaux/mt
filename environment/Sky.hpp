@@ -1,6 +1,7 @@
 #ifndef Sky_hpp
 #define Sky_hpp
 
+#include "mt.hpp"
 #include "Object.hpp"
 #include "Cloud.hpp"
 

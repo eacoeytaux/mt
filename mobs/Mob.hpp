@@ -1,6 +1,7 @@
 #ifndef Mob_hpp
 #define Mob_hpp
 
+#include "mt.hpp"
 #include "Object.hpp"
 
 namespace mt {
@@ -12,6 +13,7 @@ public:
     virtual void update();
     virtual void draw(const Camera &) const;
     
+    virtual bool alive() const;
     virtual void kill();
     
     virtual int health() const;
@@ -26,6 +28,9 @@ public:
     
 protected:
     Slider<int> m_health;
+    
+private:
+    bool m_alive = true;
 };
 
 }

@@ -1,6 +1,7 @@
 #ifndef Terrain_hpp
 #define Terrain_hpp
 
+#include "mt.hpp"
 #include "Visible.hpp"
 #include "TerrainVertex.hpp"
 #include "TerrainEdge.hpp"

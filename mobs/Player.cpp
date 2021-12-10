@@ -90,7 +90,6 @@ void Player::kill() {
 #ifdef MT_DEBUG
     if (god_mode) return;
 #endif
-    
     Mob::kill();
 }
 
@@ -98,7 +97,6 @@ void Player::hurt(int _health) {
 #ifdef MT_DEBUG
     if (god_mode) return;
 #endif
-    
     Mob::hurt(_health);
 }
 

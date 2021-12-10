@@ -12,8 +12,6 @@
 #include "Timer.hpp"
 #include "Slider.hpp"
 
-// TODO include this file in ALL
-
 #undef assert
 
 #endif /* mt_hpp */

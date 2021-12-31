@@ -6,24 +6,44 @@
 //#define Colors varray<Color>
 
 namespace mt {
+namespace graphics {
 
-const unsigned int FILLED_ = 0; // used in other graphic classes must be kept 0
+/// @brief used in other graphic classes, must be kept 0
+const unsigned int FILLED = 0;
 
+/// @class Color
+/// @brief color defined in red, green, blue, and alpha
 class Color {
 public:
+    /// @param r red [0, 255]
+    /// @param g green [0, 255]
+    /// @param b blue [0, 255]
+    /// @param a alpha [0, 255]
     Color(unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255);
+    /// @param c color
     Color(const Color & c);
+    /// @param c color
+    /// @param a new alpha
     Color(const Color & c, unsigned char a);
     
+    /// @return red
     unsigned char r() const;
+    /// @param r red
     void r(unsigned char r);
+    /// @return green
     unsigned char g() const;
+    /// @param g green
     void g(unsigned char g);
+    /// @return blue
     unsigned char b() const;
+    /// @param b blue
     void b(unsigned char b);
+    /// @return alpha
     unsigned char a() const;
+    /// @param a alpha
     void a(unsigned char a);
     
+    /// @brief inverse all RGB values i.e. value = (255 - value)
     void inverse();
     
     bool operator==(const Color &) const;
@@ -52,6 +72,7 @@ const Color CYAN(0, 255, 255);
 const Color MAGENTA(255, 0, 255);
 const Color YELLOW(255, 255, 0);
 
+}
 }
 
 #endif /* defined(__Color__) */

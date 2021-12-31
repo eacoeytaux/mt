@@ -2,14 +2,15 @@
 #define TerrainEdge_hpp
 
 #include "mt.hpp"
-#include "geometry.hpp"
+#include "Geometry.hpp"
 
 namespace mt {
+namespace exists {
 
 class TerrainVertex;
 class TerrainEdge {
 public:
-//    friend class TerrainVertex;
+    friend class TerrainVertex;
     TerrainEdge(shared_ptr<TerrainVertex> v1, shared_ptr<TerrainVertex> v2);
     TerrainEdge(const TerrainEdge &);
     
@@ -22,6 +23,7 @@ private:
     TerrainVertex * m_v2 = nullptr;
 };
 
+}
 }
 
 #endif /* TerrainEdge_hpp */

@@ -1,6 +1,7 @@
 #include "Mob.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Mob;
 
 Mob::Mob(World* _world, const Coordinate & _center, const float _width, const float _height) : Object(_world, _center, _width, _height) { }
 
@@ -8,7 +9,7 @@ void Mob::update() {
     Object::update();
 }
 
-void Mob::draw(const Camera & _camera) const {
+void Mob::draw(const Camera * _camera) const {
     Object::draw(_camera);
 #ifdef MT_DEBUG
     if (Debug::on) {
@@ -18,13 +19,13 @@ void Mob::draw(const Camera & _camera) const {
         float health_height = health_width / 10;
         Vector offset = Vector(0, ((height() / 2) * 1.2) + health_height);
         float percentage = m_health.percentage();
-        _camera.draw_rectangle(WHITE, Rectangle(health_width + (border_outline_thickness * 2), health_height + (border_outline_thickness * 2), center() - offset));
+        _camera->draw_rectangle(WHITE, Rectangle(health_width + (border_outline_thickness * 2), health_height + (border_outline_thickness * 2), position() - offset));
         if (percentage == 1) {
-            _camera.draw_rectangle(GREEN, Rectangle(health_width, health_height, center() - offset));
+            _camera->draw_rectangle(GREEN, Rectangle(health_width, health_height, position() - offset));
         } else {
-            _camera.draw_rectangle(RED, Rectangle(health_width, health_height, center() - offset));
+            _camera->draw_rectangle(RED, Rectangle(health_width, health_height, position() - offset));
             offset += Vector((health_width / 2) - ((health_width / 2) * percentage) + 1, 0);
-            _camera.draw_rectangle(GREEN, Rectangle((int)(health_width * percentage), health_height, center() - offset));
+            _camera->draw_rectangle(GREEN, Rectangle((int)(health_width * percentage), health_height, position() - offset));
         }
     }
 #endif
@@ -57,6 +58,10 @@ void Mob::heal(int _health) {
     new_health += _health;
     new_health = max<int>(new_health, m_health.max());
     m_health.value(new_health);
+}
+
+void Mob::heal_full() {
+    m_health.value(m_health.max());
 }
 
 void Mob::hurt(int _health) {

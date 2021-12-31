@@ -5,6 +5,7 @@
 #include "Object.hpp"
 
 namespace mt {
+namespace exists {
 
 class Cloud : public Object {
 private:
@@ -22,12 +23,13 @@ public:
     float max_dy() const;
     
     void update();
-    void draw(const Camera &) const;
+    void draw(const Camera *) const;
     
 private:
     varray<_puff> m_puffs;
 };
 
+}
 }
 
 #endif /* Cloud_hpp */

@@ -58,6 +58,8 @@ void Logger::print(MESSAGE_TYPE _type, const char * _entry, ...) {
 //    vfprintf(log_file, _entry, _va_args); // TODO
 //    fprintf(log_file, "\n");
 //    fflush(log_file);
+    
+//    if (type_str) delete[] type_str;
 }
 
 void Logger::close() {

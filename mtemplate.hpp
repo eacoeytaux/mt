@@ -5,6 +5,8 @@
 
 namespace mt {
 
+/// @class mtemplate
+/// @brief template file
 class mtemplate {
 public:
     virtual ~mtemplate() { }

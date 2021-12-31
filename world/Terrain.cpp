@@ -2,7 +2,8 @@
 
 #include "Random.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Terrain;
 
 const int THICKNESS = 6;
 const int OUTLINE_THICKNESS = 3;
@@ -41,18 +42,18 @@ const varray<shared_ptr<TerrainEdge>> & Terrain::edges() const {
     return m_edges;
 }
 
-void Terrain::draw(const Camera & _camera) const {
+void Terrain::draw(const Camera * _camera) const {
     for_each (vertex, vertices()) {
-        _camera.draw_polygon(GRASS_COLOR_DARK, Polygon(8, (THICKNESS / 2) + OUTLINE_THICKNESS, vertex->position()));
+        _camera->draw_polygon(GRASS_COLOR_DARK, Polygon(8, (THICKNESS / 2) + OUTLINE_THICKNESS, vertex->position()));
     }
     for_each (edge, edges()) {
-        _camera.draw_line(GRASS_COLOR_DARK, edge->line(), THICKNESS + (OUTLINE_THICKNESS * 2));
+        _camera->draw_line(GRASS_COLOR_DARK, edge->line(), THICKNESS + (OUTLINE_THICKNESS * 2));
     }
     for_each (vertex, vertices()) {
-        _camera.draw_polygon(GRASS_COLOR_LIGHT, Polygon(8, THICKNESS / 2, vertex->position()));
+        _camera->draw_polygon(GRASS_COLOR_LIGHT, Polygon(8, THICKNESS / 2, vertex->position()));
     }
     for_each (edge, edges()) {
-        _camera.draw_line(GRASS_COLOR_LIGHT, edge->line(), THICKNESS);
+        _camera->draw_line(GRASS_COLOR_LIGHT, edge->line(), THICKNESS);
     }
     
 //    for_each (edge : m_edges) {
@@ -73,7 +74,7 @@ void Terrain::draw(const Camera & _camera) const {
 //
 //        for (float x = x_min; x < x_max; x += THICKNESS) {
 //            float stem_width = THICKNESS * 5;
-//            _camera.draw_rectangle(GRASS_COLOR_DARK, Rectangle(stem_width, stem_width, Coordinate(x, edge_line.y(x)), Random::r_Angle()));
+//            _camera->draw_rectangle(GRASS_COLOR_DARK, Rectangle(stem_width, stem_width, Coordinate(x, edge_line.y(x)), Random::r_Angle()));
 //        }
 //    }
 //
@@ -84,7 +85,7 @@ void Terrain::draw(const Camera & _camera) const {
 //
 //        for (float x = x_min; x < x_max; x += THICKNESS) {
 //            float stem_width = THICKNESS * 2;
-//            _camera.draw_rectangle(GRASS_COLOR_LIGHT, Rectangle(stem_width, stem_width, Coordinate(x, edge_line.y(x)), Random::r_Angle()));
+//            _camera->draw_rectangle(GRASS_COLOR_LIGHT, Rectangle(stem_width, stem_width, Coordinate(x, edge_line.y(x)), Random::r_Angle()));
 //        }
 //    }
 }

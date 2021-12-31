@@ -2,7 +2,8 @@
 
 #include "TerrainEdge.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::TerrainVertex;
 
 TerrainVertex::TerrainVertex(const Coordinate & _pos) {
     m_pos = _pos;

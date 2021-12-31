@@ -2,7 +2,8 @@
 
 #include "Triangle.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Circle;
 
 Circle::Circle(float _radius, const Coordinate & _center) {
     center(_center);
@@ -121,8 +122,8 @@ varray<Coordinate> Circle::coordinates() const {
     return coordinates;
 }
 
-Path Circle::lines() const {
-    Path lines;
+varray<Line> Circle::lines() const {
+    varray<Line> lines;
     Angle start_angle(PI / 2);
     Angle delta_angle = 2 * PI / CIRCLE_PRECISION;
     Coordinate c1 = center() + Vector(radius(), 0);
@@ -139,7 +140,7 @@ Path Circle::lines() const {
     return lines;
 }
 
-Path Circle::arc(const Angle & _a1, const Angle & _a2) const {
+varray<Line> Circle::arc(const Angle & _a1, const Angle & _a2) const {
     Angle arc = _a1 - _a2;
     Angle d_angle = arc * (CIRCLE_PRECISION_ANGLE / arc.radians());
     Vector start(_a1, radius());

@@ -6,6 +6,7 @@
 //#define Polygons varray<Polygon>
 
 namespace mt {
+namespace geometry {
 
 class Triangle;
 class Rectangle;
@@ -29,7 +30,7 @@ public:
     float upper_bound_y() const;
     
     varray<Coordinate> coordinates() const;
-    Path lines() const;
+    varray<Line> lines() const;
     varray<Triangle> triangles() const;
     
     Polygon operator+(const Vector &) const;
@@ -49,6 +50,7 @@ private:
     float m_upper_bound_y = 0;
 };
 
+}
 }
 
 #endif /* Polygon_hpp */

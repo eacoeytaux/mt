@@ -6,13 +6,16 @@
 #include "Cloud.hpp"
 
 namespace mt {
+namespace exists {
 
+/// @class Sky
+/// @brief most background visual layer
 class Sky : public Object {
 public:
     Sky(World*, int cloud_regen_rate = 0);
     
     void update();
-    void draw(const Camera &) const;
+    void draw(const Camera *) const;
     
 private:
     varray<shared_ptr<Cloud>> m_clouds;
@@ -20,6 +23,7 @@ private:
     Timer m_cloud_timer;
 };
 
+}
 }
 
 #endif /* Sky_hpp */

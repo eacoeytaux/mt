@@ -1,6 +1,7 @@
 #include "Color.hpp"
 
 using namespace mt;
+using mt::graphics::Color;
 
 Color::Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a) {
     r(_r);

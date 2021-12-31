@@ -9,6 +9,7 @@
 //#define Shapes varray<Shape>
 
 namespace mt {
+namespace geometry {
 
 class Triangle;
 
@@ -17,7 +18,7 @@ public:
     virtual float area() const;
     virtual int sides() const;
     virtual varray<Coordinate> coordinates() const;
-    virtual Path lines() const;
+    virtual varray<Line> lines() const;
     virtual varray<Triangle> triangles() const;
     virtual void move(const Vector &);
     
@@ -25,6 +26,7 @@ public:
     virtual bool operator!=(const Shape &) const;
 };
 
+}
 }
 
 #endif /* Shape_hpp */

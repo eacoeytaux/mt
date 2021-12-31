@@ -6,12 +6,14 @@
 #include "Fire.hpp"
 #include "Tree.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::World;
 
 const float camera_zoom_ratio = 0.9;
 
 World::World() :
 m_sky(this) {
+    m_objects = varray<shared_ptr<Object>>(0);
     reset();
 }
 
@@ -23,8 +25,8 @@ void World::reset() {
     
     m_darkness = Darkness();
     
-    m_sky = Sky(this, 200);
     m_wind = Vector(1.5, 0);
+    m_sky = Sky(this, 200);
     
     for_each (terrain_edge, m_terrain.edges()) {
         int tree_count = Random::r_int(0, 2);
@@ -34,13 +36,7 @@ void World::reset() {
         }
     }
     
-#ifdef MT_DEBUG
-    bool was_god = m_player && m_player->god();
-#endif
     m_player = shared_ptr<Player>(new Player(this, Coordinate(120, 200)));
-#ifdef MT_DEBUG
-    m_player->god(was_god);
-#endif
     m_objects.push_back(m_player);
     
     m_objects.push_back(shared_ptr<Fire>(new Fire(this, Coordinate(0, 30))));
@@ -62,7 +58,7 @@ void World::update() {
 }
 
 void World::draw() const {
-    const Camera & camera = m_camera;
+    const Camera * camera = &m_camera;
     m_sky.draw(camera);
     m_terrain.draw(camera);
     for_each (object, m_objects) object->draw(camera);
@@ -70,15 +66,15 @@ void World::draw() const {
     m_player->draw_reticle(camera); // draw reticle above everything else
 #ifdef MT_DEBUG
     if (Debug::on) {
-        float BARRIER_THICKNESS = 4 / camera.zoom();
-        m_camera.draw_rectangle(RED, Rectangle(2 * (camera.width() + (BARRIER_THICKNESS / 2)), 2 * (camera.height() + (BARRIER_THICKNESS / 2)), Coordinate(0, 0)), BARRIER_THICKNESS + 1, 0);
+        float BARRIER_THICKNESS = 4 / m_camera.zoom();
+        m_camera.draw_rectangle(RED, Rectangle(2 * (m_camera.width() + (BARRIER_THICKNESS / 2)), 2 * (m_camera.height() + (BARRIER_THICKNESS / 2)), Coordinate(0, 0)), BARRIER_THICKNESS + 1, 0);
     }
 #endif
 }
 
 void World::mouse_movement(const Coordinate & screen_pos) {
     Coordinate world_pos = screen_pos - (Vector(m_camera.width(), m_camera.height()) / 2) + m_camera.center();
-    Angle angle_from_player = Vector(m_player->center(), world_pos).angle();
+    Angle angle_from_player = Vector(m_player->position(), world_pos).angle();
     angle_from_player *= -1;
     m_player->aim(angle_from_player);
 }

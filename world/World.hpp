@@ -5,6 +5,7 @@
 #include "Constants.hpp"
 #include "Geometry.hpp"
 #include "Graphics.hpp"
+#include "Physics.hpp"
 
 #include "Camera.hpp"
 #include "Object.hpp"
@@ -15,10 +16,11 @@
 #include "Player.hpp"
 
 namespace mt {
+namespace exists {
 
+/// @class World
+/// @brief everything that currently exists
 class World {
-    const float gravity = 3;
-    
 public:
     World();
     
@@ -51,7 +53,7 @@ public:
 private:
     uint64_t m_age = 0;
     
-    shared_ptr<Player> m_player;
+    shared_ptr<Player> m_player = nullptr;
     
     Camera m_camera;
     varray<shared_ptr<Object>> m_objects;
@@ -61,6 +63,7 @@ private:
     Sky m_sky;
 };
 
+}
 }
 
 #endif /* World_hpp */

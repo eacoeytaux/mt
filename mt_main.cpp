@@ -13,7 +13,7 @@
 #include "SysTime.hpp"
 #include "World.hpp"
 
-using namespace mt;
+NAMESPACES
 
 #ifdef MT_DEBUG
 bool Debug::on = true;
@@ -181,7 +181,7 @@ void MTROGUE::run() {
     world.camera_width(width);
     world.camera_height(height);
     
-    int argc = 0; char * argv[] = { };
+    int argc = 0; char * argv[] = { 0 };
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
     glutInitWindowSize(width, height);

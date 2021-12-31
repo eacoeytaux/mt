@@ -5,7 +5,8 @@
 #include "SysTime.hpp"
 #include "Angle.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::util::Random;
 
 void Random::seed() {
     seed((int)(SysTime().total_ms() * SysTime().total_ms() * SysTime().total_ms()));
@@ -39,7 +40,7 @@ int Random::r_int(const int _range) {
 
 int Random::r_int(const int _low_bound, const int _high_bound) {
     Assert::soft(_high_bound >= _low_bound, "incorrect bounds");
-    return rint(_high_bound - _low_bound) + _low_bound;
+    return Random::r_int(_high_bound - _low_bound) + _low_bound;
 }
 
 float Random::r_float(const float _range) {

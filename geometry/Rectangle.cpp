@@ -4,7 +4,9 @@
 #include "Polygon.hpp"
 #include "Circle.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Rectangle;
+using RectangleSplit = mt::geometry::Rectangle::RectangleSplit;
 
 Rectangle::Rectangle(const float _width, const float _height, const Coordinate & _center, const Angle & _rotation) {
     center(_center);
@@ -240,7 +242,7 @@ varray<Coordinate> Rectangle::coordinates() const {
     return { top_right(), top_left(), bottom_left(), bottom_right() };
 }
 
-Path Rectangle::lines() const {
+varray<Line> Rectangle::lines() const {
     return { top(), left(), bottom(), right() };
 }
 
@@ -251,7 +253,7 @@ varray<Triangle> Rectangle::triangles() const {
 Rectangle::RectangleSplit::RectangleSplit() :
 varray<Rectangle>(4, Rectangle(0, 0, COORDINATE_NEG_INFINITY)) { }
 
-Rectangle::RectangleSplit::RectangleSplit(const varray<Rectangle> & _array) :
+RectangleSplit::RectangleSplit(const varray<Rectangle> & _array) :
 varray<Rectangle>(_array) {
     Assert::fatal(size() == 4, "RectangleSplit does not contain 4 Rectangles");
 }

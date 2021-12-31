@@ -2,7 +2,8 @@
 
 #include "World.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Player;
 
 const float WIDTH = 1.5 * METER;
 const float HEIGHT = 2 * METER;
@@ -24,8 +25,8 @@ m_movement_speed(DEFAULT_SPEED),
 m_rope_max_length(DEFAULT_ROPE_MAX_LENGTH),
 m_hook_growth_speed(DEFAULT_HOOK_GROWTH_SPEED),
 m_hook_retract_speed(DEFAULT_HOOK_RETRACT_SPEED),
-m_rope(_world, m_center, DEFAULT_ROPE_MAX_LENGTH, DEFAULT_HOOK_GROWTH_SPEED, DEFAULT_HOOK_RETRACT_SPEED) {
-    _world->camera_target(m_center, true);
+m_rope(_world, position(), DEFAULT_ROPE_MAX_LENGTH, DEFAULT_HOOK_GROWTH_SPEED, DEFAULT_HOOK_RETRACT_SPEED) {
+    _world->camera_target(position(), true);
     health(100);
 }
 
@@ -33,33 +34,32 @@ void Player::update_velocity() {
     if (!m_gravity_affected) { // can fly?
         if (m_looking_up) {
             if (m_moving_right && !m_moving_left) {
-                m_velocity += Vector(Angle(PI * 1/4), m_movement_speed) - Vector(m_movement_speed, 0);
+                add_velocity(Vector(Angle(PI * 1/4), m_movement_speed) - Vector(m_movement_speed, 0));
             } else if (m_moving_left && !m_moving_right) {
-                m_velocity += Vector(Angle(PI * 3/4), m_movement_speed) - Vector(-m_movement_speed, 0);
+                add_velocity(Vector(Angle(PI * 3/4), m_movement_speed) - Vector(-m_movement_speed, 0));
             } else {
-                m_velocity += Vector(0, m_movement_speed);
+                add_velocity(Vector(0, m_movement_speed));
             }
         }
         if (m_looking_down) {
             if (m_moving_right && !m_moving_left) {
-                m_velocity += Vector(Angle(PI * 7/4), m_movement_speed) - Vector(m_movement_speed, 0);
+                add_velocity(Vector(Angle(PI * 7/4), m_movement_speed) - Vector(m_movement_speed, 0));
             } else if (m_moving_left && !m_moving_right) {
-                m_velocity += Vector(Angle(PI * 5/4), m_movement_speed) - Vector(-m_movement_speed, 0);
+                add_velocity(Vector(Angle(PI * 5/4), m_movement_speed) - Vector(-m_movement_speed, 0));
             } else {
-                m_velocity += Vector(0, -m_movement_speed);
+                add_velocity(Vector(0, -m_movement_speed));
             }
         }
     }
         
     if (m_moving_right) {
-        m_velocity += Vector(m_movement_speed, 0);
+        add_velocity(Vector(m_movement_speed, 0));
     }
     if (m_moving_left) {
-        m_velocity += Vector(-m_movement_speed, 0);
+        add_velocity(Vector(-m_movement_speed, 0));
     }
     
     Mob::update_velocity();
-    
     
     if (m_ground) m_jump_reset_timer.tick();
     if (m_jumping) {
@@ -70,7 +70,7 @@ void Player::update_velocity() {
         }
         
         if (!m_jumping_timer.tick()) {
-            m_velocity += (Vector(0, JUMP_STRENGTH) - GRAVITY) * (1 - m_jump_degradation);
+            add_velocity((Vector(0, JUMP_STRENGTH) - GRAVITY) * (1 - m_jump_degradation));
             m_jump_degradation = 1 - (JUMP_DEGRATION_RATIO * (1 - m_jump_degradation));
             m_ground = nullptr;
         }
@@ -78,12 +78,12 @@ void Player::update_velocity() {
         m_jumping_timer.reset(0);
     }
     
-    m_velocity *= 0.9;
+    velocity(velocity() * 0.9);
 }
 
-void Player::move(const Vector & _vector) {
-    Mob::move(_vector);
-    m_world->camera_target(center());
+void Player::move() {
+    Mob::move();
+    m_world->camera_target(position());
 }
 
 void Player::kill() {
@@ -107,49 +107,49 @@ void Player::update() {
     }
 #endif
     Object::update();
-    m_world->add_light_source(center(), 100);
+    m_world->add_light_source(position(), 100);
     
-    m_rope.center(m_center);
+    m_rope.position(position());
     m_rope.angle(m_aim_angle);
     m_rope.firing(m_firing_hook);
     m_rope.update();
 }
 
-void Player::draw(const Camera & _camera) const {
+void Player::draw(const Camera * _camera) const {
     // draw hook
     m_rope.draw(_camera);
     
     Mob::draw(_camera);
     
     // draw character
-    _camera.draw_rectangle(YELLOW, Rectangle(m_width, m_height, m_center));
+    _camera->draw_rectangle(YELLOW, Rectangle(width(), height(), position()));
     
 #ifdef MT_DEBUG
     if (Debug::on) {
         if (!god_mode) { // no boundaries in god mode
             for_each (terrain_edge, m_world->terrain().edges()) {
-                _camera.draw_line(CYAN, terrain_edge->line() + Vector(0, m_height / 2), 1);
+                _camera->draw_line(CYAN, terrain_edge->line() + Vector(0, m_height / 2), 1);
             }
         }
         
-        _camera.draw_polygon(MAGENTA, Polygon(4, 3 / _camera.zoom(), m_center));
-        Vector velocity_graphic = m_velocity;
-        velocity_graphic.origin(m_center);
+        _camera->draw_polygon(MAGENTA, Polygon(4, 3 / _camera->zoom(), position()));
+        Vector velocity_graphic = velocity();
+        velocity_graphic.origin(position());
         velocity_graphic *= 2;
         if (velocity_graphic.magnitude() > 1) {
-            _camera.draw_vector(MAGENTA, velocity_graphic, 3, velocity_graphic.magnitude(), 10);
+            _camera->draw_vector(MAGENTA, velocity_graphic, 3, velocity_graphic.magnitude(), 10);
         }
     }
 #endif
 }
 
-void Player::draw_reticle(const Camera & _camera) const {
+void Player::draw_reticle(const Camera * _camera) const {
     if (m_aiming) {
-        _camera.draw_rectangle(BLACK, Rectangle((RETICLE_LENGTH + 2) / _camera.zoom(), (RETICLE_WIDTH + 2) / _camera.zoom(), m_center + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
-        _camera.draw_rectangle(BLACK, Rectangle((RETICLE_WIDTH + 2) / _camera.zoom(), (RETICLE_LENGTH + 2) / _camera.zoom(), m_center + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_rectangle(BLACK, Rectangle((RETICLE_LENGTH + 2) / _camera->zoom(), (RETICLE_WIDTH + 2) / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_rectangle(BLACK, Rectangle((RETICLE_WIDTH + 2) / _camera->zoom(), (RETICLE_LENGTH + 2) / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
         
-        _camera.draw_rectangle(WHITE, Rectangle(RETICLE_WIDTH / _camera.zoom(), RETICLE_LENGTH / _camera.zoom(), m_center + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
-        _camera.draw_rectangle(WHITE, Rectangle(RETICLE_LENGTH / _camera.zoom(), RETICLE_WIDTH / _camera.zoom(), m_center + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_rectangle(WHITE, Rectangle(RETICLE_WIDTH / _camera->zoom(), RETICLE_LENGTH / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_rectangle(WHITE, Rectangle(RETICLE_LENGTH / _camera->zoom(), RETICLE_WIDTH / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
     }
 }
 

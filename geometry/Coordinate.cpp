@@ -3,7 +3,8 @@
 #include "Angle.hpp"
 #include "Vector.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Coordinate;
 
 Coordinate::Coordinate(float _x, float _y) {
     x(_x);

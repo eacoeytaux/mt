@@ -3,7 +3,8 @@
 #include "Random.hpp"
 #include "World.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Fire;
 
 const int LIGHT_DISTANCE = 4 * METER;
 const int FLAME_WAIT = 5;
@@ -41,14 +42,14 @@ Fire::Fire(World* _world, const Coordinate & _center) : Object(_world, _center) 
 }
 
 void Fire::update() {
-    m_world->add_light_source(center() + Vector(0, METER), LIGHT_DISTANCE);
+    m_world->add_light_source(position() + Vector(0, METER), LIGHT_DISTANCE);
     
     Random::seed();
     
     if (flame_timer.tick()) {
         flame_timer.reset(FLAME_WAIT);
-        m_flames_orange.push_back(Flame(m_center, FLAME_ORANGE_RADIUS));
-        m_flames_yellow.push_back(Flame(m_center, FLAME_YELLOW_RADIUS));
+        m_flames_orange.push_back(Flame(position(), FLAME_ORANGE_RADIUS));
+        m_flames_yellow.push_back(Flame(position(), FLAME_YELLOW_RADIUS));
     }
     
     for_each (& flame, m_flames_orange) {
@@ -56,7 +57,7 @@ void Fire::update() {
         flame.offset += Vector(Angle((PI / 2) + Random::r_float(-FLAME_DEVIATION.radians(), FLAME_DEVIATION.radians())), FLAME_YELLOW_SPEED) + (m_world->wind() / FLAME_WIND_RESISTANCE);
     }
     while (m_flames_orange.size() && m_flames_orange[0].radius <= 0) {
-        m_smokes.push_back(Smoke(m_center + m_flames_orange[0].offset, 1, SMOKE_ALPHA));
+        m_smokes.push_back(Smoke(position() + m_flames_orange[0].offset, 1, SMOKE_ALPHA));
         m_flames_orange.erase(m_flames_orange.begin());
     }
     
@@ -78,14 +79,14 @@ void Fire::update() {
     }
 }
 
-void Fire::draw(const Camera & _camera) const {
+void Fire::draw(const Camera * _camera) const {
     for_each (flame, m_flames_orange) {
-        _camera.draw_polygon(FLAME_ORANGE_COLOR, Polygon(4, flame.radius / 2, center() + flame.offset));
+        _camera->draw_polygon(FLAME_ORANGE_COLOR, Polygon(4, flame.radius / 2, position() + flame.offset));
     }
     for_each (flame, m_flames_yellow) {
-        _camera.draw_polygon(FLAME_YELLOW_COLOR, Polygon(4, flame.radius / 2, center() + flame.offset));
+        _camera->draw_polygon(FLAME_YELLOW_COLOR, Polygon(4, flame.radius / 2, position() + flame.offset));
     }
     for_each (smoke, m_smokes) {
-        _camera.draw_circle(Color(SMOKE_GRAY_VALUE, SMOKE_GRAY_VALUE, SMOKE_GRAY_VALUE, smoke.alpha), Circle(smoke.radius, center() + smoke.offset));
+        _camera->draw_circle(Color(SMOKE_GRAY_VALUE, SMOKE_GRAY_VALUE, SMOKE_GRAY_VALUE, smoke.alpha), Circle(smoke.radius, position() + smoke.offset));
     }
 }

@@ -6,6 +6,7 @@
 //#define Rectangles varray<Rectangle>
 
 namespace mt {
+namespace geometry {
 
 class Triangle;
 class Polygon;
@@ -51,7 +52,7 @@ public:
     bool intersects(const Circle &) const;
     
     varray<Coordinate> coordinates() const;
-    Path lines() const;
+    varray<Line> lines() const;
     varray<Triangle> triangles() const;
     
     bool operator==(const Rectangle &) const;
@@ -81,6 +82,7 @@ private:
     Angle m_rotation;
 };
 
+}
 }
 
 #endif /* defined(__Rectangle__) */

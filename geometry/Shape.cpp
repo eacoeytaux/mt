@@ -2,12 +2,13 @@
 
 #include "Triangle.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Shape;
 
 float Shape::area() const { return 0; }
 int Shape::sides() const { return (int)this->coordinates().size(); }
 varray<Coordinate> Shape::coordinates() const { return { }; }
-Path Shape::lines() const { return Path(); }
+varray<Line> Shape::lines() const { return varray<Line>(); }
 varray<Triangle> Shape::triangles() const { return varray<Triangle>(); }
 void Shape::move(const Vector &) { }
 

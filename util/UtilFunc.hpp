@@ -2,8 +2,10 @@
 #define utilfunc_hpp
 
 #include "SysIncludes.hpp"
+#include "Assert.hpp"
 
 namespace mt {
+namespace util {
 
 #define pixel_precision_depth 16
 #define pixel_precision 1/(2<<pixel_precision_depth)
@@ -19,48 +21,68 @@ namespace mt {
 
 #define for_each(x,list) for (auto x : list)
 
-#define va_list_from_char(STR) va_list args; va_start(args,STR);
+const float DEFAULT_FLOAT_EPSILON = pixel_precision;
 
-const float __default_float_epsilon = 0.01;
-
-inline bool float_eq(float x, float y, float epsilon = __default_float_epsilon) {
+/// @brief float equal
+/// @param x first float
+/// @param y second float
+/// @param epsilon (optional) how close the floats can be to considered equal
+/// @return true if floats are close enough in value
+inline bool float_eq(float x, float y, float epsilon = DEFAULT_FLOAT_EPSILON) {
     if(fabs(x - y) < epsilon) return true; // equals!
     else return false;
 }
 
-inline bool float_gt(float x, float y, float epsilon = __default_float_epsilon) {
+/// @brief float greater than
+/// @param x first float
+/// @param y second float
+/// @param epsilon (optional) how close the floats can be to considered equal
+inline bool float_gt(float x, float y, float epsilon = DEFAULT_FLOAT_EPSILON) {
     return (x > y);
 }
 
-inline bool float_ge(float x, float y, float epsilon = __default_float_epsilon) {
+/// @brief float greater than or equal
+/// @param x first float
+/// @param y second float
+/// @param epsilon (optional) how close the floats can be to considered equal
+inline bool float_ge(float x, float y, float epsilon = DEFAULT_FLOAT_EPSILON) {
     return ((x > y) || float_eq(x, y));
 }
 
-inline bool float_lt(float x, float y, float epsilon = __default_float_epsilon) {
+/// @brief float less than
+/// @param x first float
+/// @param y second float
+/// @param epsilon (optional) how close the floats can be to considered equal
+inline bool float_lt(float x, float y, float epsilon = DEFAULT_FLOAT_EPSILON) {
     return (x < y);
 }
 
-inline bool float_le(float x, float y, float epsilon = __default_float_epsilon) {
+/// @brief float less than or equal
+/// @param x first float
+/// @param y second float
+/// @param epsilon (optional) how close the floats can be to considered equal
+inline bool float_le(float x, float y, float epsilon = DEFAULT_FLOAT_EPSILON) {
     return ((x < y) || float_eq(x, y));
 }
 
+/// @brief turns variable to negative
+/// @param t variable to flip
 template<typename T>
 void flip(T & t) {
     t *= -1;
 }
 
+/// @brief turns variable to negative
+/// @param t variable to flip
+/// @return flipped variable
 template<typename T>
-T flip(const T & _t) {
-    return _t * -1;
+T flip(const T & t) {
+    return t * -1;
 }
 
-template<typename T>
-varray<T> populate_varray(const T & _t, const unsigned int _count) {
-    varray<T> ret(_count);
-    for_range(_count) ret[i] = _t;
-    return ret;
-}
-
+/// @brief swaps two variables
+/// @param t1 first variable
+/// @param t2 second variable
 template<typename T>
 void swap(T & t1, T & t2) {
     T tmp = t1;
@@ -68,68 +90,94 @@ void swap(T & t1, T & t2) {
     t2 = tmp;
 }
 
+/// @brief returns whether a variable is in range
+/// @param t first variable
+/// @param high upper bound of range
+/// @param low lower bound of range, default 0
+/// @param inclusive returns true if ( t == high ) || ( t == low )
+/// @return whether variable is in range
 template<typename T>
-bool in_range(const T & _t, const T & _high, const T & _low = T(0), bool _inclusive = true) {
-    T high = _high;
-    T low = _low;
-    if (low < high) swap<T>(high, low);
-    return (_inclusive && ((_t >= low) && (_t <= high))) || (!_inclusive && ((_t > low) && (_t < high)));
+bool in_range(const T & t, const T & high, const T & low = T(0), bool inclusive = true) {
+    T h = high;
+    T l = low;
+    if (l > h) swap<T>(h, l);
+    return (inclusive && ((t >= l) && (t <= h))) || (!inclusive && ((t > l) && (t < h)));
 }
 
+/// @brief returns absolute value of variable
+/// @param t variable to take absolute value
+/// @return absolute value of variable
 template<typename T>
 T abs(const T & t) {
     if (t < 0) return t * -1;
     else return t;
 }
 
+/// @brief to the power!
+/// @param t base value
+/// @param p exponent value
+/// @return t^p
 template<typename T>
-T pow(const T & _t, const unsigned int _p) {
-    if (!_p) return T();
-    T ret = _t;
-    for_range (_p - 1) {
-        ret *= _t;
+T pow(const T & t, const unsigned int p) {
+    if (!p) return T();
+    T ret = t;
+    for_range (p - 1) {
+        ret *= t;
     }
     return ret;
 }
 
+/// @brief minimum of two values
+/// @param t1 first value
+/// @param t2 second value
+/// @return minimum value
 template<typename T>
-T min(const T & _t1, const T & _t2) {
-    if (_t1 <= _t2) {
-        return _t1;
+T min(const T & t1, const T & t2) {
+    if (t1 <= t2) {
+        return t1;
     } else {
-        return _t2;
+        return t2;
     }
 }
 
+/// @brief minimum value from list
+/// @param list list of values
+/// @return minimum value in list
 template<typename T>
-T min(const varray<T> & _list) {
-    assert(_list.size());
-    T ret = _list[0];
-    for_each (t, _list) {
-        if (t < ret) ret = t;
-    }
+T min(const varray<T> & list) {
+    Assert::soft(list.size(), "list must not be empty");
+    T ret = list[0];
+    for_each (t, list) if (t < ret) ret = t;
     return ret;
 }
 
+/// @brief maximum of two values
+/// @param t1 first value
+/// @param t2 second value
+/// @return maximum value
 template<typename T>
-T max(const T & _t1, const T & _t2) {
-    if (_t1 >= _t2) {
-        return _t1;
+T max(const T & t1, const T & t2) {
+    if (t1 >= t2) {
+        return t1;
     } else {
-        return _t2;
+        return t2;
     }
 }
 
+/// @brief maximum value from list
+/// @param list list of values
+/// @return maximum value in list
 template<typename T>
-T max(const varray<T> & _list) {
-    assert(_list.size());
-    T ret = _list[0];
-    for_each (t, _list) {
+T max(const varray<T> & list) {
+    Assert::soft(list.size(), "list must not be empty");
+    T ret = list[0];
+    for_each (t, list) {
         if (t > ret) ret = t;
     }
     return ret;
 }
 
+}
 }
 
 #endif /* utilfunc_hpp */

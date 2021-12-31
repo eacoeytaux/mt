@@ -2,7 +2,8 @@
 
 #include "Vector.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Angle;
 
 Angle::Angle(const float _radians, const bool _truncate) {
     truncate(_truncate);
@@ -141,19 +142,19 @@ bool Angle::operator!=(const Angle & _angle) const {
     return !(*this == _angle);
 }
 
-bool Angle::operator >(const Angle & _angle) const {
+bool Angle::operator>(const Angle & _angle) const {
     return float_gt(radians(), _angle.radians());
 }
 
-bool Angle::operator >=(const Angle & _angle) const {
+bool Angle::operator>=(const Angle & _angle) const {
     return float_ge(radians(), _angle.radians());
 }
 
-bool Angle::operator <(const Angle & _angle) const {
+bool Angle::operator<(const Angle & _angle) const {
     return float_lt(radians(), _angle.radians());
 }
 
-bool Angle::operator <=(const Angle & _angle) const {
+bool Angle::operator<=(const Angle & _angle) const {
     return float_le(radians(), _angle.radians());
 }
 

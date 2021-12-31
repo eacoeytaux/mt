@@ -2,14 +2,15 @@
 
 #include "World.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Object;
 
-Object::Object(World* _world, const Coordinate & _center, const float _width, const float _height, const float _z, const Vector & _velocity) {
+Object::Object(World* _world, const Coordinate & _position, const float _width, const float _height, const float _z, const Vector & _velocity) {
     m_world = _world;
     width(_width);
     height(_height);
     z(_z);
-    center(_center);
+    position(_position);
     velocity(_velocity);
     m_casts_shadow = (_z == 1);
     m_gravity_affected = (_z == 1);
@@ -17,22 +18,31 @@ Object::Object(World* _world, const Coordinate & _center, const float _width, co
 }
 
 void Object::update() {
-    update_velocity();
-    move(m_velocity);
+    move();
 }
 
 void Object::update_velocity() {
+    Vector velocity = Mass::velocity();
     if (m_ground && m_terrarin_boundaries) {
         Angle ground_angle = m_ground->line().angle();
-        m_velocity.rotate(ground_angle * -1);
-        m_velocity.dy(0);
-        m_velocity.rotate(ground_angle);
+        velocity.rotate(ground_angle * -1);
+        velocity.dy(0);
+        velocity.rotate(ground_angle);
     } else if (!m_ground && m_gravity_affected) {
-        m_velocity += GRAVITY;
+        velocity += GRAVITY;
     }
+    Mass::velocity(velocity);
 }
 
-void Object::move(const Vector & _vector) {
+void Object::move() {
+    update_velocity();
+    Mass::move();
+    
+    Vector _vector(0, 0); // TODO!!!
+    Coordinate center = position();
+    
+    if (!_vector.magnitude()) return;
+    
     Vector movement = _vector;
     float movement_percentage = 0;
     Vector remaining = Vector(0, 0);
@@ -43,23 +53,23 @@ void Object::move(const Vector & _vector) {
         for_each (terrain_edge, m_world->terrain().edges()) {
             if (m_ground && ((terrain_edge == m_ground) || (m_ground->vertex1() && terrain_edge.get() == m_ground->vertex1()->edge1()) || (m_ground->vertex2() && terrain_edge.get() == m_ground->vertex2()->edge2()))) continue;
             
-            if (Line(m_center, m_center + _vector).intersects(terrain_edge->line() + Vector(0, height() / 2))) {
+            if (Line(center, center + _vector).intersects(terrain_edge->line() + Vector(0, height() / 2))) {
                 next_ground = terrain_edge;
-                movement = Line(m_center, m_center + _vector).intersection(terrain_edge->line() + Vector(0, height() / 2)) - m_center;
+                movement = Line(center, center + _vector).intersection(terrain_edge->line() + Vector(0, height() / 2)) - center;
                 movement_percentage = 0;
                 if (movement.magnitude()) movement_percentage = movement.magnitude() / _vector.magnitude();
                 remaining = _vector - movement;
                 remaining.rotate(terrain_edge->line().angle() * -1);
                 remaining.dy(0);
                 remaining.rotate(terrain_edge->line().angle());
-                m_velocity = remaining * (1 - movement_percentage);
+                velocity(remaining * (1 - movement_percentage));
             }
         }
     }
     
     if (m_ground && next_ground == m_ground) {
-        if ((m_center + _vector).x() > m_ground->line().right().x()) {
-            movement = m_ground->vertex2()->position() - m_center + Vector(0, height() / 2);
+        if ((center + _vector).x() > m_ground->line().right().x()) {
+            movement = m_ground->vertex2()->position() - center + Vector(0, height() / 2);
             movement_percentage = 0;
             if (movement.magnitude())
                 movement_percentage = movement.magnitude() / _vector.magnitude();
@@ -72,9 +82,9 @@ void Object::move(const Vector & _vector) {
             } else {
                 next_ground = nullptr;
             }
-            m_velocity = remaining * (1 - movement_percentage);
-        } else if ((m_center + _vector).x() < m_ground->line().left().x()) {
-            movement = m_ground->vertex1()->position() - m_center + Vector(0, height() / 2);
+            velocity(remaining * (1 - movement_percentage));
+        } else if ((center + _vector).x() < m_ground->line().left().x()) {
+            movement = m_ground->vertex1()->position() - center + Vector(0, height() / 2);
             movement_percentage = 0;
             if (movement.magnitude())
                 movement_percentage = movement.magnitude() / _vector.magnitude();
@@ -84,39 +94,31 @@ void Object::move(const Vector & _vector) {
             } else {
                 next_ground = nullptr;
             }
-            m_velocity = remaining * (1 - movement_percentage);
+            velocity(remaining * (1 - movement_percentage));
         }
     }
     
     m_ground = next_ground;
-    center(center() + movement);
+    position(position() + movement);
     if (movement.magnitude() > 0.1 && remaining.magnitude() > 0.1)
-        move(remaining); // TODO loop instead of recursive?
+        move(); // TODO loop instead of recursive?
 }
 
-void Object::draw(const Camera & _camera) const {
+void Object::draw(const Camera * _camera) const {
     if (m_casts_shadow) draw_shadow(_camera);
 }
 
-void Object::draw_shadow(const Camera & _camera) const {
+void Object::draw_shadow(const Camera * _camera) const {
     // TODO
 }
 
 #ifdef MT_DEBUG
-void Object::draw_visable_box(const Camera & _camera) const {
+void Object::draw_visable_box(const Camera * _camera) const {
     if (m_width && m_height) {
-        _camera.draw_polygon(Color(255, 255, 255, 64), visable_box(), 2 / _camera.zoom(), m_z);
+        _camera->draw_polygon(Color(255, 255, 255, 64), visable_box(), 2 / _camera->zoom(), m_z);
     }
 }
 #endif
-
-Coordinate Object::center() const {
-    return m_center;
-}
-
-void Object::center(const Coordinate & _center) {
-    m_center = _center;
-}
 
 float Object::width() const {
     return m_width;
@@ -142,14 +144,6 @@ void Object::z(const float _z) {
     m_z = _z;
 }
 
-Vector Object::velocity() const {
-    return m_velocity;
-}
-
-void Object::velocity(const Vector & _velocity) {
-    m_velocity = _velocity;
-}
-
 bool Object::terrarin_boundaries() const {
     return m_terrarin_boundaries;
 }
@@ -170,5 +164,5 @@ void Object::gravity_affected(bool _gravity_affected) {
 }
 
 Rectangle Object::visable_box() const {
-    return Rectangle(m_width, m_height, m_center);
+    return Rectangle(width(), height(), position());
 }

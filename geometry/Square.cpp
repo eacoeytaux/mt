@@ -1,6 +1,7 @@
 #include "Square.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Square;
 
 Square::Square(float _width, const Coordinate & _center, const Angle & _angle) : Rectangle(_width, _width, _center, _angle) { }
 

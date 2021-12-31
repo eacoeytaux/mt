@@ -2,6 +2,7 @@
 #define mt_hpp
 
 #include "Version.hpp"
+#include "Namespaces.hpp"
 #include "SysIncludes.hpp"
 #include "UtilFunc.hpp"
 #include "Assert.hpp"
@@ -11,7 +12,5 @@
 #include "Random.hpp"
 #include "Timer.hpp"
 #include "Slider.hpp"
-
-#undef assert
 
 #endif /* mt_hpp */

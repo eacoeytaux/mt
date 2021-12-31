@@ -1,15 +1,17 @@
 #include "Darkness.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Darkness;
+using LightSource = mt::exists::Darkness::LightSource;
 
-Darkness::LightSource::LightSource(const Coordinate & _position, const float _distance, const float _flicker) {
+LightSource::LightSource(const Coordinate & _position, const float _distance, const float _flicker) {
     position = _position;
     distance = _distance;
     flicker = _flicker;
     tint = Color(GREEN, 64);
 }
 
-Darkness::LightSource::LightSource(const Coordinate & _position, const float _distance, const Color & _tint, const float _flicker) {
+LightSource::LightSource(const Coordinate & _position, const float _distance, const Color & _tint, const float _flicker) {
     position = _position;
     distance = _distance;
     flicker = _flicker;
@@ -17,11 +19,11 @@ Darkness::LightSource::LightSource(const Coordinate & _position, const float _di
     tint = Color(GREEN, 64); // TODO delete
 }
 
-bool Darkness::LightSource::operator==(const LightSource & _light_source) const {
+bool LightSource::operator==(const LightSource & _light_source) const {
     return ((position == _light_source.position) && (distance == _light_source.distance) && (flicker == _light_source.flicker));
 }
 
-bool Darkness::LightSource::operator!=(const LightSource & _light_source) const {
+bool LightSource::operator!=(const LightSource & _light_source) const {
     return !(*this == _light_source);
 }
 
@@ -41,27 +43,27 @@ void Darkness::clear_light_sources() {
     m_light_sources.clear();
 }
 
-void Darkness::draw(const Camera & _camera) const {
+void Darkness::draw(const Camera * _camera) const {
     if (!m_darkness_slider.value()) return;
     
     Random::seed(0); // TODO
-    Rectangle full(_camera.width(), _camera.height(), _camera.center());
+    Rectangle full(_camera->width(), _camera->height(), _camera->center());
     draw_recursive(_camera, full, m_light_sources, { });
     
     for_each (light, m_light_sources) {
-        _camera.draw_circle(Color(WHITE, 64), Circle(light.distance, light.position));
+        _camera->draw_circle(Color(WHITE, 64), Circle(light.distance, light.position));
     }
 }
 
-void Darkness::fill_boundary_full(const Camera & _camera, const Rectangle & _boundary) const {
+void Darkness::fill_boundary_full(const Camera * _camera, const Rectangle & _boundary) const {
     Rectangle boundary = _boundary;
 //    boundary.center(Coordinate(ceil(_boundary.center().x()), ceil(_boundary.center().y())));
 //    boundary.width(ceil(boundary.width()));
 //    boundary.height(ceil(boundary.height()));
-    _camera.draw_rectangle(Color(BLACK, m_darkness_slider.value() * 255 / 2), boundary);
+    _camera->draw_rectangle(Color(BLACK, m_darkness_slider.value() * 255 / 2), boundary);
 }
 
-void Darkness::fill_boundary_edge(const Camera & _camera, const Rectangle & _boundary, const LightSource & _source, const QUADRANT & _quadrant) const {
+void Darkness::fill_boundary_edge(const Camera * _camera, const Rectangle & _boundary, const LightSource & _source, const QUADRANT & _quadrant) const {
     Vector v1;
     Vector v2;
     if ((_quadrant == Q1) || (_quadrant == Q3)) {
@@ -72,15 +74,15 @@ void Darkness::fill_boundary_edge(const Camera & _camera, const Rectangle & _bou
         v2 = Vector(_source.position, _boundary.bottom_left());
     }
     
-    Path arc = Circle(_source.distance, _source.position).arc(v1.angle(), v2.angle());
-//    _camera.draw_lines(CYAN, arc);
+    varray<Line> arc = Circle(_source.distance, _source.position).arc(v1.angle(), v2.angle());
+//    _camera->draw_lines(CYAN, arc);
     
-    _camera.draw_line(Color(WHITE, 127), Line(v1.destination(), v2.destination()));
-    _camera.draw_rectangle(_source.tint, _boundary);
-//    _camera.draw_rectangle(RED, _boundary, 2);
+    _camera->draw_line(Color(WHITE, 127), Line(v1.destination(), v2.destination()));
+    _camera->draw_rectangle(_source.tint, _boundary);
+//    _camera->draw_rectangle(RED, _boundary, 2);
 }
 
-void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectangle, const varray<LightSource> & _possible_sources, const varray<LightSource> & _sources) const {
+void Darkness::draw_recursive(const Camera * _camera, const Rectangle & _rectangle, const varray<LightSource> & _possible_sources, const varray<LightSource> & _sources) const {
     if (!_rectangle.area()) return;
     
     varray<LightSource> new_sources;
@@ -111,7 +113,7 @@ void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectang
         
         // section is entirely emersed in light, no need to recurse further
         if (source.position.distance(farthest) + 1 < source.distance) {
-            _camera.draw_rectangle(source.tint, _rectangle);
+            _camera->draw_rectangle(source.tint, _rectangle);
             return;
         }
         
@@ -293,10 +295,10 @@ void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectang
 //            fill_boundary_edge(_camera, edge_boundary, subtraction, quadrant);
             
             for_range (q, QUADRANTS) {
-                if (edge_boundary_split_index != q) _camera.draw_rectangle(source.tint, rectangle_split[q]);
+                if (edge_boundary_split_index != q) _camera->draw_rectangle(source.tint, rectangle_split[q]);
             }
         } else {
-            _camera.draw_rectangle(Color(YELLOW, 64), _rectangle);
+            _camera->draw_rectangle(Color(YELLOW, 64), _rectangle);
         }
             
         }
@@ -316,18 +318,18 @@ void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectang
 //                Coordinate split_point = Coordinate(subtraction.x_high(_rectangle.upper_bound_y()), _rectangle.upper_bound_y());
 //                Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
 //                fill_boundary_edge(_camera, rectangle_split.bottom_right(), subtraction, Q1);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
 //            } else if y_ratio_greater {
 //                Coordinate split_point = Coordinate(_rectangle.upper_bound_x(), subtraction.y_high(_rectangle.upper_bound_x()));
 //                Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
 //                fill_boundary_edge(_camera, rectangle_split.top_left(), subtraction, Q1);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
 //            } else {
-//                _camera.draw_rectangle(Color(YELLOW, 64), _rectangle);
+//                _camera->draw_rectangle(Color(YELLOW, 64), _rectangle);
 //            }
         } else if (d_angle < PI) {
             float x_ratio = subtraction.center().distance(_rectangle.bottom_left()) / subtraction.radius();
@@ -344,18 +346,18 @@ void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectang
                 Coordinate split_point = Coordinate(subtraction.x_low(_rectangle.upper_bound_y()), _rectangle.upper_bound_y());
                 Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
                 fill_boundary_edge(_camera, rectangle_split.bottom_left(), source, Q2);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
             } else if (y_ratio_greater) {
                 Coordinate split_point = Coordinate(_rectangle.lower_bound_x(), subtraction.y_high(_rectangle.lower_bound_x()));
                 Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
                 fill_boundary_edge(_camera, rectangle_split.top_right(), source, Q2);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
             } else {
-                _camera.draw_rectangle(Color(MAGENTA, 64), _rectangle);
+                _camera->draw_rectangle(Color(MAGENTA, 64), _rectangle);
             }
         } else if (d_angle < PI * 1.5) {
             float x_ratio = subtraction.center().distance(_rectangle.top_left()) / subtraction.radius();
@@ -372,18 +374,18 @@ void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectang
                 Coordinate split_point = Coordinate(subtraction.x_low(_rectangle.lower_bound_y()), _rectangle.lower_bound_y());
                 Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
                 fill_boundary_edge(_camera, rectangle_split.top_left(), source, Q3);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
             } else if (y_ratio_greater) {
                 Coordinate split_point = Coordinate(_rectangle.lower_bound_x(), subtraction.y_low(_rectangle.lower_bound_x()));
                 Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
                 fill_boundary_edge(_camera, rectangle_split.bottom_right(), source, Q3);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
             } else {
-                _camera.draw_rectangle(Color(MAGENTA, 64), _rectangle);
+                _camera->draw_rectangle(Color(MAGENTA, 64), _rectangle);
             }
         } else { // if (d_angle < PI * 2) {
             float x_ratio = subtraction.center().distance(_rectangle.top_right()) / subtraction.radius();
@@ -400,23 +402,23 @@ void Darkness::draw_recursive(const Camera & _camera, const Rectangle & _rectang
                 Coordinate split_point = Coordinate(subtraction.x_high(_rectangle.lower_bound_y()), _rectangle.lower_bound_y());
                 Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
                 fill_boundary_edge(_camera, rectangle_split.top_right(), source, Q4);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
             } else if (y_ratio_greater) {
                 Coordinate split_point = Coordinate(_rectangle.upper_bound_x(), subtraction.y_low(_rectangle.upper_bound_x()));
                 Rectangle::RectangleSplit rectangle_split = _rectangle.split(split_point);
                 fill_boundary_edge(_camera, rectangle_split.bottom_left(), source, Q4);
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
-//                _camera.draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.bottom_right());
+//                _camera->draw_rectangle(Color(GREEN, 64), rectangle_split.top_left());
             } else {
-                _camera.draw_rectangle(Color(MAGENTA, 64), _rectangle);
+                _camera->draw_rectangle(Color(MAGENTA, 64), _rectangle);
             }
         }
     }
     
     else if (new_sources.size() > 1) {
-        _camera.draw_rectangle(Color(RED, 64), _rectangle);
+        _camera->draw_rectangle(Color(RED, 64), _rectangle);
     }
 }

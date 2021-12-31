@@ -5,6 +5,7 @@
 #include "Object.hpp"
 
 namespace mt {
+namespace exists {
 
 class Rope : public Object {
 public:
@@ -20,7 +21,7 @@ public:
     void max_length(float);
     
     void update();
-    void draw(const Camera &) const;
+    void draw(const Camera *) const;
     
 private:
     bool m_firing = false;
@@ -31,6 +32,7 @@ private:
     float m_retract_speed;
 };
 
+}
 }
 
 #endif /* Rope_hpp */

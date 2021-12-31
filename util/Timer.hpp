@@ -4,11 +4,17 @@
 #include "mt.hpp"
 
 namespace mt {
+namespace util {
 
+/// @class Timer
+/// @brief countdown timer
 class Timer {
 public:
-    Timer(const uint64_t _countdown = 0) : m_countdown(_countdown) { }
+    virtual ~Timer() { }
+    /// @param countdown value to start countdown from
+    Timer(const uint64_t countdown = 0) : m_countdown(countdown) { }
     
+    /// @return true if countdown has completed
     bool tick() {
         if (m_countdown) {
             return !m_countdown--;
@@ -16,11 +22,13 @@ public:
             return true;
         }
     }
-
-    void reset(const uint64_t _countdown) {
-        m_countdown = _countdown;
+    
+    /// @param countdown value to start countdown from
+    void reset(const uint64_t countdown) {
+        m_countdown = countdown;
     }
 
+    /// @return remaining ticks in countdown
     uint64_t remaining() const {
         return m_countdown;
     }
@@ -29,6 +37,7 @@ private:
     uint64_t m_countdown;
 };
 
+}
 }
 
 #endif /* Timer_hpp */

@@ -6,14 +6,15 @@
 #include "Rope.hpp"
 
 namespace mt {
+namespace exists {
 
 class Player : public Mob {
 public:
     Player(World*, const Coordinate & center);
     
     void update();
-    void draw(const Camera &) const;
-    void draw_reticle(const Camera &) const;
+    void draw(const Camera *) const;
+    void draw_reticle(const Camera *) const;
     
     void kill();
     void hurt(int health);
@@ -31,7 +32,7 @@ public:
     
 private:
     void update_velocity();
-    void move(const Vector &);
+    void move();
     
     bool m_moving_right = false;
     bool m_moving_left = false;
@@ -59,10 +60,12 @@ public:
     bool god() const;
     void god(bool);
 private:
+    /// @brief whether or not player is an indestructible god
     bool god_mode = false;
 #endif
 };
 
+}
 }
 
 #endif /* Player_hpp */

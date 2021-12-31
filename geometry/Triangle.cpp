@@ -1,6 +1,7 @@
 #include "Triangle.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Triangle;
 
 Triangle::Triangle(const Coordinate & _c1, const Coordinate & _c2, const Coordinate & _c3) {
     m_c1 = _c1;
@@ -49,8 +50,8 @@ varray<Coordinate> Triangle::coordinates() const {
     return varray<Coordinate>({ c1(), c2(), c3() });
 }
 
-Path Triangle::lines() const {
-    return Path({ line1(), line2(), line3() });
+varray<Line> Triangle::lines() const {
+    return varray<Line>({ line1(), line2(), line3() });
 }
 
 varray<Triangle> Triangle::triangles() const {

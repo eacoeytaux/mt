@@ -2,7 +2,8 @@
 
 #include "TerrainVertex.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::TerrainEdge;
 
 TerrainEdge::TerrainEdge(shared_ptr<TerrainVertex> _v1, shared_ptr<TerrainVertex> _v2) :
 m_v1(_v1.get()),

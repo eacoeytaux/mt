@@ -6,13 +6,14 @@
 #include "Timer.hpp"
 
 namespace mt {
+namespace exists {
 
 class Fire : public Object {
 public:
     Fire(World*, const Coordinate & center);
     
     void update();
-    void draw(const Camera &) const;
+    void draw(const Camera *) const;
     
 private:
     struct Flame;
@@ -39,6 +40,7 @@ private:
     };
 };
 
+}
 }
 
 #endif /* Fire_hpp */

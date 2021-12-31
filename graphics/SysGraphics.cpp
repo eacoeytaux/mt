@@ -8,7 +8,8 @@
 #include <GL/glut.h>
 #endif
 
-using namespace mt;
+NAMESPACES
+using mt::graphics::SysGraphics;
 
 void glcolor(const Color & _color) {
     glColor4f(_color.r() / 255.f, _color.g() / 255.f, _color.b() / 255.f, _color.a() / 255.f);
@@ -36,19 +37,19 @@ void SysGraphics::draw_line(const Color & _color, const Line & _line, const unsi
     draw_rectangle(_color, Rectangle(line_vector.magnitude(), _thickness, (line_vector / 2).destination(), _line.angle()));
 }
 
-void SysGraphics::draw_lines(const Color & _color, const Path & _lines, const unsigned int _thickness) {
+void SysGraphics::draw_lines(const Color & _color, const varray<Line> & _lines, const unsigned int _thickness) {
     Colors colors;
     for_range (_lines.size()) colors.push_back(_color);
     draw_lines(colors, _lines, _thickness);
 }
 
-void SysGraphics::draw_lines(const Colors & _colors, const Path & _path, const unsigned int _thickness) {
-    Assert::debug(_colors.size() == _path.size(), "Path Colors size (%i) does not = Path size (i)", _colors.size(), _path.size());
+void SysGraphics::draw_lines(const Colors & _colors, const varray<Line> & _path, const unsigned int _thickness) {
+    Assert::debug(_colors.size() == _path.size(), "varray<Line> Colors size (%i) does not = varray<Line> size (i)", _colors.size(), _path.size());
     for_range (_path.size()) draw_line(_colors[i], _path[i], _thickness);
 }
 
 void SysGraphics::draw_triangle(const Color & _color, const Triangle & _triangle, const unsigned int _thickness) {
-    draw_triangle(populate_varray<Color>(_color, 3), _triangle, _thickness);
+    draw_triangle(varray<Color>(3, _color), _triangle, _thickness);
 }
 
 void SysGraphics::draw_triangle(const Colors & _colors, const Triangle & _triangle, const unsigned int _thickness) {
@@ -68,7 +69,7 @@ void SysGraphics::draw_triangle(const Colors & _colors, const Triangle & _triang
 }
 
 void SysGraphics::draw_rectangle(const Color & _color, const Rectangle & _rectangle, const unsigned int _thickness) {
-    draw_rectangle(populate_varray<Color>(_color, 4), _rectangle, _thickness);
+    draw_rectangle(varray<Color>(4, _color), _rectangle, _thickness);
 }
 
 void SysGraphics::draw_rectangle(const Colors & _colors, const Rectangle & _rectangle, const unsigned int _thickness) {
@@ -104,7 +105,7 @@ void SysGraphics::draw_polygon(const Color & _color, const Polygon & _polygon, c
 }
     
 void SysGraphics::draw_polygon(const Colors & _colors, const Polygon & _polygon, const unsigned int _thickness) {
-    Assert::debug(_colors.size() == _polygon.coordinates().size(), "Polygon Colors size (%i) does not = Polygon Path size (%i)", _colors.size(), _polygon.coordinates().size());
+    Assert::debug(_colors.size() == _polygon.coordinates().size(), "Polygon Colors size (%i) does not = Polygon varray<Line> size (%i)", _colors.size(), _polygon.coordinates().size());
     if (!_thickness) { // draw filled
         glBegin(GL_POLYGON);
         for_range (_polygon.coordinates().size()) {

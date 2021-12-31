@@ -9,6 +9,7 @@
 #define CIRCLE_PRECISION_ANGLE ((2 * PI) / CIRCLE_PRECISION)
 
 namespace mt {
+namespace geometry {
 
 class Triangle;
 
@@ -17,7 +18,7 @@ public:
     Circle(float radius = 0, const Coordinate & center = Coordinate());
     
     Coordinate center() const;
-    void center(const Coordinate &);
+    void center(const Coordinate & center);
     float radius() const;
     void radius(float radius);
     float diameter() const;
@@ -37,17 +38,13 @@ public:
     float x_low(float y) const;
     float y_high(float x) const;
     float y_low(float x) const;
-    // TODO add line
     
 //    bool intersects(const Line &) const;
 //    Line intersection(const Line &) const;
-
-//    bool intersects(const Rectangle &) const;
-//    bool intersects(const Circle &) const;
     
     varray<Coordinate> coordinates() const;
-    Path lines() const;
-    Path arc(const Angle &, const Angle & = Angle(0)) const;
+    varray<Line> lines() const;
+    varray<Line> arc(const Angle &, const Angle & = Angle(0)) const;
     varray<Triangle> triangles() const;
     varray<Triangle> triangles(const unsigned int precision) const;
     
@@ -67,6 +64,7 @@ private:
     Coordinate m_center;
 };
 
+}
 }
 
 #endif /* defined(__Circle__) */

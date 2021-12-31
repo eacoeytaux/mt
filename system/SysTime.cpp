@@ -3,6 +3,7 @@
 #include <ctime>
 
 using namespace mt;
+using namespace mt::util;
 
 SysTime::SysTime() :
 m_ms(std::chrono::system_clock::now().time_since_epoch().count() / 1000) { }

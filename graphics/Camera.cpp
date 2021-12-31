@@ -2,7 +2,8 @@
 
 #include "SysGraphics.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::graphics::Camera;
 
 const float MIN_ZOOM = 0.25;
 const float MAX_ZOOM = 4;
@@ -20,6 +21,10 @@ void Camera::update() {
     float zoom_delta = (m_zoom_target - m_zoom) * m_movement_ratio;
     m_zoom += zoom_delta;
     m_center += Vector(m_center, (Vector(m_target) * m_zoom).destination()) * m_movement_ratio;
+}
+
+Rectangle Camera::screen() const {
+    return Rectangle(center(), width(), height());
 }
 
 #ifdef MT_DEBUG
@@ -42,18 +47,18 @@ void Camera::draw_line(const Color & _color, const Line & _line, const unsigned 
     SysGraphics::draw_line(_color, Line(c1, c2), thickness);
 }
 
-void Camera::draw_lines(const Color & _color, const Path & _path, const unsigned int _thickness, const float _z) const {
+void Camera::draw_lines(const Color & _color, const varray<Line> & _path, const unsigned int _thickness, const float _z) const {
     Colors colors;
     for_range (_path.size()) colors.push_back(_color);
     draw_lines(colors, _path, _thickness);
 }
     
-void Camera::draw_lines(const Colors & _colors, const Path & _path, const unsigned int _thickness, const float _z) const {
+void Camera::draw_lines(const Colors & _colors, const varray<Line> & _path, const unsigned int _thickness, const float _z) const {
     for_range (_path.size()) draw_line(_colors[i], _path[i], _thickness);
 }
 
 void Camera::draw_triangle(const Color & _color, const Triangle & _triangle, const unsigned int _thickness, float _z) const {
-    draw_triangle(populate_varray<Color>(_color, 3), _triangle, _thickness);
+    draw_triangle(varray<Color>(3, _color), _triangle, _thickness);
 }
 
 void Camera::draw_triangle(const Colors & _colors, const Triangle & _triangle, const unsigned int _thickness, float _z) const {
@@ -62,7 +67,7 @@ void Camera::draw_triangle(const Colors & _colors, const Triangle & _triangle, c
 }
 
 void Camera::draw_rectangle(const Color & _color, const Rectangle & _rectangle, const unsigned int _thickness, float _z) const {
-    draw_rectangle(populate_varray<Color>(_color, 4), _rectangle, _thickness, _z);
+    draw_rectangle(varray<Color>(4, _color), _rectangle, _thickness, _z);
 }
 
 void Camera::draw_rectangle(const Colors & _colors, const Rectangle & _rectangle, const unsigned int _thickness, float _z) const {

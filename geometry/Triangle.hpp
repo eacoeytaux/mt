@@ -6,6 +6,7 @@
 //#define Triangles varray<Triangle>
 
 namespace mt {
+namespace geometry {
 
 class Triangle : public Shape {
 public:
@@ -22,7 +23,7 @@ public:
     float area() const;
     
     varray<Coordinate> coordinates() const;
-    Path lines() const;
+    varray<Line> lines() const;
     varray<Triangle> triangles() const;
     
     Triangle operator+(const Vector &) const;
@@ -37,6 +38,7 @@ private:
     Coordinate m_c1, m_c2, m_c3;
 };
 
+}
 }
 
 #endif /* Triangle_hpp */

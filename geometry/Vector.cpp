@@ -1,6 +1,7 @@
 #include "Vector.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Vector;
 
 Vector::Vector(float _dx, float _dy, const Coordinate & _origin) {
     origin(_origin);

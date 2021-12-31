@@ -3,7 +3,8 @@
 #include "mt.hpp"
 #include "Vector.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Line;
 
 Line::Line(const Coordinate & c1, const Coordinate & c2) {
     float x1 = c1.x();

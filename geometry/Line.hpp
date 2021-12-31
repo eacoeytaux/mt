@@ -6,6 +6,7 @@
 #include "Angle.hpp"
 
 namespace mt {
+namespace geometry {
 
 class Line {
 public:
@@ -52,8 +53,7 @@ private:
     float m_m, m_b;
 };
 
-typedef varray<Line> Path;
-
+}
 }
 
 #endif /* defined(__Line__) */

@@ -2,13 +2,14 @@
 #define Darkness_hpp
 
 #include "mt.hpp"
-#include "Visible.hpp"
+#include "Graphics.hpp"
 #include "Object.hpp"
 
 namespace mt {
+namespace exists {
 
 class Darkness : public Visible {
-private:
+public:
     struct LightSource {
     public:
         LightSource(const Coordinate & source, const float distance, const float flicker = 0);
@@ -21,6 +22,7 @@ private:
         bool operator==(const LightSource &) const;
         bool operator!=(const LightSource &) const;
     };
+    
 public:
     Darkness();
     
@@ -28,17 +30,18 @@ public:
     void add_light_source(const Coordinate & position, const float distance, const float flicker = 0);
     void clear_light_sources();
     
-    void draw(const Camera &) const;
+    void draw(const Camera *) const;
     
 private:
-    void fill_boundary_full(const Camera &, const Rectangle & boundary) const;
-    void fill_boundary_edge(const Camera &, const Rectangle & boundary, const LightSource & source, const QUADRANT & quadrant) const;
-    void draw_recursive(const Camera &, const Rectangle & boundary, const varray<LightSource> & possible_sources, const varray<LightSource> & sources = { }) const;
+    void fill_boundary_full(const Camera *, const Rectangle & boundary) const;
+    void fill_boundary_edge(const Camera *, const Rectangle & boundary, const LightSource & source, const QUADRANT & quadrant) const;
+    void draw_recursive(const Camera *, const Rectangle & boundary, const varray<LightSource> & possible_sources, const varray<LightSource> & sources = { }) const;
     
     varray<LightSource> m_light_sources;
     Slider<float> m_darkness_slider = Slider<float>(1);
 };
 
+}
 }
 
 #endif /* Darkness_hpp */

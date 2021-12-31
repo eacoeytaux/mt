@@ -15,6 +15,7 @@ namespace mt {
 // general
 using std::shared_ptr;
 using std::string;
+using std::uint64_t;
 
 // math
 using std::sqrt;

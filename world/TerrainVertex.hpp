@@ -2,9 +2,10 @@
 #define TerrainVertex_hpp
 
 #include "mt.hpp"
-#include "geometry.hpp"
+#include "Geometry.hpp"
 
 namespace mt {
+namespace exists {
 
 class TerrainEdge;
 class TerrainVertex {
@@ -22,6 +23,7 @@ private:
     TerrainEdge * m_e2 = nullptr;
 };
 
+}
 }
 
 #endif /* TerrainVertex_hpp */

@@ -6,6 +6,7 @@
 //#define Squares varray<Square>
 
 namespace mt {
+namespace geometry {
 
 class Square : public Rectangle {
 public:
@@ -15,6 +16,7 @@ public:
     void height(const float);
 };
 
+}
 }
 
 #endif /* Square_hpp */

@@ -2,7 +2,7 @@
 #define Constants_hpp
 
 #include "mt.hpp"
-#include "geometry.hpp"
+#include "Geometry.hpp"
 #include "graphics.hpp"
 
 namespace mt {

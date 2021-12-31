@@ -3,7 +3,8 @@
 #include "Random.hpp"
 #include "World.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::exists::Cloud;
 
 const float X_STRETCH = 2;
 const int MIN_SMALL_PUFF_COUNT = 16;
@@ -25,6 +26,8 @@ Cloud::_puff::_puff(float _RADIUS, const Vector & _center_offset) {
 }
 
 Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
+    gravity_affected(false);
+    
     Object::width(max_dx());
     Object::height(max_dy());
     Object::z(0.1);
@@ -33,7 +36,8 @@ Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
     
     // set location
     Coordinate location(-max_dx(), Random::r_float(max_dy()));
-    m_center = location;
+    position(location);
+    velocity(m_world->wind());
     
     int small_puff_count = Random::r_int(MIN_SMALL_PUFF_COUNT, MAX_SMALL_PUFF_COUNT);
     for_range (small_puff_count) {
@@ -59,15 +63,15 @@ float Cloud::max_dy() const {
 }
 
 void Cloud::update() {
-    m_center += m_world->wind();
+    move();
 }
 
-void Cloud::draw(const Camera & _camera) const {
+void Cloud::draw(const Camera * _camera) const {
     for_each (puff, m_puffs) {
-        _camera.draw_circle(WHITE, Circle(puff.m_radius, m_center + puff.m_center_offset), FILLED_, m_z);
+        _camera->draw_circle(WHITE, Circle(puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
     }
     for_each (puff, m_puffs) {
-        _camera.draw_circle(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO, m_center + puff.m_center_offset), FILLED_, m_z);
+        _camera->draw_circle(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO,  position() + puff.m_center_offset), FILLED, m_z);
     }
     
     Object::draw(_camera);

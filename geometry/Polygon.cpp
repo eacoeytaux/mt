@@ -5,7 +5,8 @@
 #include "Rectangle.hpp"
 #include "Circle.hpp"
 
-using namespace mt;
+NAMESPACES
+using mt::geometry::Polygon;
 
 Polygon::Polygon(const varray<Coordinate> & _coordinates) :
 m_coordinates(_coordinates) {
@@ -84,8 +85,8 @@ varray<Coordinate> Polygon::coordinates() const {
     return m_coordinates;
 }
 
-Path Polygon::lines() const {
-    Path lines;
+varray<Line> Polygon::lines() const {
+    varray<Line> lines;
     for_range (coordinates().size()) {
         if (!i) continue;
         Line line(coordinates()[i - 1], coordinates()[i]);

@@ -8,11 +8,20 @@ namespace graphics {
 
 class Camera;
 
+const uint LAYER_BACK = 0;
+const uint LAYER_PLAYER = 128;
+
 /// @class Visible
 /// @brief anything that is visible
 class Visible {
 public:
     virtual void draw(const Camera *) const = 0;
+    
+    Visible(uint layer_position = 0) : m_layer_position(layer_position) { }
+    uint layer_position() const { return m_layer_position; }
+    void layer_position(uint layer_position) { m_layer_position = layer_position; }
+private:
+    uint m_layer_position;
 };
 
 }

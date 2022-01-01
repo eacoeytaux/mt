@@ -3,7 +3,7 @@
 #include "TerrainVertex.hpp"
 
 NAMESPACES
-using mt::exists::TerrainEdge;
+using mt::exst::TerrainEdge;
 
 TerrainEdge::TerrainEdge(shared_ptr<TerrainVertex> _v1, shared_ptr<TerrainVertex> _v2) :
 m_v1(_v1.get()),

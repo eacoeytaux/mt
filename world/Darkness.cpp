@@ -1,8 +1,8 @@
 #include "Darkness.hpp"
 
 NAMESPACES
-using mt::exists::Darkness;
-using LightSource = mt::exists::Darkness::LightSource;
+using mt::exst::Darkness;
+using LightSource = mt::exst::Darkness::LightSource;
 
 LightSource::LightSource(const Coordinate & _position, const float _distance, const float _flicker) {
     position = _position;

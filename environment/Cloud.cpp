@@ -4,7 +4,7 @@
 #include "World.hpp"
 
 NAMESPACES
-using mt::exists::Cloud;
+using mt::exst::Cloud;
 
 const float X_STRETCH = 2;
 const int MIN_SMALL_PUFF_COUNT = 16;
@@ -35,7 +35,9 @@ Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
     Random::seed();
     
     // set location
-    Coordinate location(-max_dx(), Random::r_float(max_dy()));
+    float x = max_dx();
+    if (_world->player()) x = _world->player()->position().x() + (_world->camera().screen().width() / 2) + max_dx();
+    Coordinate location(x, Random::r_float(max_dy()));
     position(location);
     velocity(m_world->wind());
     

@@ -5,7 +5,7 @@
 #include "Object.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class Tree : public Object {
 public:

@@ -11,15 +11,15 @@
 NAMESPACES
 using mt::graphics::SysGraphics;
 
-void glcolor(const Color & _color) {
+void glColor(const Color & _color) {
     glColor4f(_color.r() / 255.f, _color.g() / 255.f, _color.b() / 255.f, _color.a() / 255.f);
 }
 
-GLint * GLcoor(const Coordinate & _coor) {
-    static GLint glcoor[2];
-    glcoor[0] = _coor.x();
-    glcoor[1] = _coor.y();
-    return glcoor;
+GLint * glCoordinate(const Coordinate & _coor) {
+    static GLint glCoor[2];
+    glCoor[0] = _coor.x();
+    glCoor[1] = _coor.y();
+    return glCoor;
 }
 
 #ifdef MT_DEBUG
@@ -56,12 +56,12 @@ void SysGraphics::draw_triangle(const Colors & _colors, const Triangle & _triang
     Assert::debug(_colors.size() == 3, "Triangle Colors size (%i) does not = 3", _colors.size());
     if (!_thickness) { // draw filled
         glBegin(GL_TRIANGLES);
-        glcolor(_colors[0]);
-        glVertex2iv(GLcoor(_triangle.c1()));
-        glcolor(_colors[1]);
-        glVertex2iv(GLcoor(_triangle.c2()));
-        glcolor(_colors[2]);
-        glVertex2iv(GLcoor(_triangle.c3()));
+        glColor(_colors[0]);
+        glVertex2iv(glCoordinate(_triangle.c1()));
+        glColor(_colors[1]);
+        glVertex2iv(glCoordinate(_triangle.c2()));
+        glColor(_colors[2]);
+        glVertex2iv(glCoordinate(_triangle.c3()));
         glEnd();
     } else {
         draw_lines(_colors, _triangle.lines(), _thickness);
@@ -76,14 +76,14 @@ void SysGraphics::draw_rectangle(const Colors & _colors, const Rectangle & _rect
     Assert::debug(_colors.size() == 4, "Rectangle Colors size (%i) does not = 4", _colors.size());
     if (!_thickness) { // draw filled
         glBegin(GL_QUADS);
-        glcolor(_colors[0]);
-        glVertex2iv(GLcoor(_rectangle.top_right()));
-        glcolor(_colors[1]);
-        glVertex2iv(GLcoor(_rectangle.bottom_right()));
-        glcolor(_colors[2]);
-        glVertex2iv(GLcoor(_rectangle.bottom_left()));
-        glcolor(_colors[3]);
-        glVertex2iv(GLcoor(_rectangle.top_left()));
+        glColor(_colors[0]);
+        glVertex2iv(glCoordinate(_rectangle.top_right()));
+        glColor(_colors[1]);
+        glVertex2iv(glCoordinate(_rectangle.bottom_right()));
+        glColor(_colors[2]);
+        glVertex2iv(glCoordinate(_rectangle.bottom_left()));
+        glColor(_colors[3]);
+        glVertex2iv(glCoordinate(_rectangle.top_left()));
         glEnd();
     } else {
         draw_lines(_colors, _rectangle.lines(), _thickness);
@@ -109,8 +109,8 @@ void SysGraphics::draw_polygon(const Colors & _colors, const Polygon & _polygon,
     if (!_thickness) { // draw filled
         glBegin(GL_POLYGON);
         for_range (_polygon.coordinates().size()) {
-            glcolor(_colors[i]);
-            glVertex2iv(GLcoor(_polygon.coordinates()[i]));
+            glColor(_colors[i]);
+            glVertex2iv(glCoordinate(_polygon.coordinates()[i]));
         }
         glEnd();
     } else { // draw outline

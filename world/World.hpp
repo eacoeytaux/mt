@@ -16,7 +16,7 @@
 #include "Player.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 /// @class World
 /// @brief everything that currently exists
@@ -48,7 +48,12 @@ public:
     Vector wind() const;
     void wind(const Vector &);
     
+    void add_object(shared_ptr<Object>);
+    
     void add_light_source(const Coordinate & position, const float distance, const float flicker = 0);
+    
+protected:
+    void clear_objects();
     
 private:
     uint64_t m_age = 0;
@@ -57,6 +62,7 @@ private:
     
     Camera m_camera;
     varray<shared_ptr<Object>> m_objects;
+    varray<shared_ptr<Object>> m_object_queue;
     Darkness m_darkness;
     Terrain m_terrain;
     Vector m_wind;

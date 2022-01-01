@@ -1,7 +1,7 @@
 #ifndef mt_main_hpp
 #define mt_main_hpp
 
-#include "mt.hpp"
+#include "util/mt.hpp"
 
 namespace mt {
 
@@ -42,6 +42,10 @@ public:
 /// L - toggle the lights
 /// \n
 /// ? - toggle debug mode
+/// \n
+/// < - zoom out
+/// \n
+/// > - zoom in
 /// @section install_sec Installation
 /// install OpenGL and GLUT
 /// \n

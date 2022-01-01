@@ -1,7 +1,7 @@
 #include "Mob.hpp"
 
 NAMESPACES
-using mt::exists::Mob;
+using mt::exst::Mob;
 
 Mob::Mob(World* _world, const Coordinate & _center, const float _width, const float _height) : Object(_world, _center, _width, _height) { }
 

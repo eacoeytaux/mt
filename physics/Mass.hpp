@@ -9,7 +9,7 @@ namespace mt {
 namespace physics {
 
 /// @class Mass
-/// @brief physically exists
+/// @brief anything that has volume
 class Mass {
 public:
     virtual ~Mass() { }

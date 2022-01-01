@@ -16,7 +16,7 @@
 NAMESPACES
 
 #ifdef MT_DEBUG
-bool Debug::on = true;
+bool Debug::on = false;
 #endif
 
 int window_handle = 0;
@@ -45,7 +45,7 @@ void display(void) {
     glFlush();
 }
 
-void reshape(int _w, int _h) {
+void reshape_window(int _w, int _h) {
     width = _w;
     height = _h;
     world.camera_width(width);
@@ -86,10 +86,10 @@ void keyboard_down(unsigned char _key, int _x, int _y) {
             world.camera_width(width);
             world.camera_height(height);
             break;
-        case '.':
+        case '>':
             world.camera_zoom_in();
             break;
-        case ',':
+        case '<':
             world.camera_zoom_out();
             break;
         case 27: // esc
@@ -192,7 +192,7 @@ void MTROGUE::run() {
     
     glClearColor(0, 0, 0, 0);
     glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
+    glutReshapeFunc(reshape_window);
     glutKeyboardFunc(keyboard_down);
     glutKeyboardUpFunc(keyboard_up);
     glutMouseFunc(mouse_click);

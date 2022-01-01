@@ -1,9 +1,10 @@
 #include "Object.hpp"
 
 #include "World.hpp"
+#include "Terrain.hpp"
 
 NAMESPACES
-using mt::exists::Object;
+using mt::exst::Object;
 
 Object::Object(World* _world, const Coordinate & _position, const float _width, const float _height, const float _z, const Vector & _velocity) {
     m_world = _world;

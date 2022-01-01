@@ -6,7 +6,7 @@
 #include "Cloud.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 /// @class Sky
 /// @brief most background visual layer

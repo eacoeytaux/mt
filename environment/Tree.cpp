@@ -4,7 +4,7 @@
 #include "World.hpp"
 
 NAMESPACES
-using mt::exists::Tree;
+using mt::exst::Tree;
 
 const Angle MAX_SWAY = PI / 32;
 const float TRUNK_HEIGHT = 60;

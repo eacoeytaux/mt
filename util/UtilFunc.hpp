@@ -7,8 +7,8 @@
 namespace mt {
 namespace util {
 
-#define pixel_precision_depth 16
-#define pixel_precision 1/(2<<pixel_precision_depth)
+#define PIXEL_PRECISION_DEPTH 16
+#define PIXEL_PRECISION 1/(2<<PIXEL_PRECISION_DEPTH)
 
 // avoid confusion between std::vector and mt::Vector
 #define varray std::vector
@@ -21,7 +21,7 @@ namespace util {
 
 #define for_each(x,list) for (auto x : list)
 
-const float DEFAULT_FLOAT_EPSILON = pixel_precision;
+const float DEFAULT_FLOAT_EPSILON = PIXEL_PRECISION;
 
 /// @brief float equal
 /// @param x first float

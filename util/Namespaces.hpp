@@ -13,7 +13,7 @@ namespace graphics { }
 /// @brief basic physic classes
 namespace physics { }
 /// @brief things that exist in reality
-namespace exists { }
+namespace exst { }
 
 //using namespace mt;
 //using namespace mt::util;
@@ -22,7 +22,7 @@ namespace exists { }
 //using namespace mt::physics;
 //using namespace mt::exists;
 
-#define NAMESPACES using namespace mt; using namespace mt::util; using namespace mt::geometry; using namespace mt::graphics; using namespace mt::physics; using namespace mt::exists;
+#define NAMESPACES using namespace mt; using namespace mt::util; using namespace mt::geometry; using namespace mt::graphics; using namespace mt::physics; using namespace mt::exst;
 NAMESPACES
 
 }

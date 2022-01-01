@@ -1,7 +1,7 @@
 #include "Rope.hpp"
 
 NAMESPACES
-using mt::exists::Rope;
+using mt::exst::Rope;
 
 const int ROPE_WIDTH = 4;
 const int HOOK_WIDTH = 6;

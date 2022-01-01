@@ -7,16 +7,16 @@
 #include "Graphics.hpp"
 #include "Physics.hpp"
 
-#include "Terrain.hpp"
-
 namespace mt {
-namespace exists {
+namespace exst {
 
 class World;
+class Object;
+class TerrainEdge;
 
 /// @class Object
 /// @brief object that exists in world, super descriptive I know
-class Object : public Mass, Visible {
+class Object : public Mass, public Visible {
 public:
     Object(World*, const Coordinate & position, const float width = 0, const float height = 0, const float z = 1, const Vector & velocity = Vector(0, 0));
     
@@ -54,7 +54,7 @@ protected:
     float m_width;
     /// @brief height of object
     float m_height;
-    /// @brief z value in world, 1 is playable plane
+    /// @brief z value in world, which corresponds to parallax perspective (1 is playable plane)
     float m_z;
     
     /// @brief set to true for objects that fall

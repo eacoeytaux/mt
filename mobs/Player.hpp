@@ -6,7 +6,7 @@
 #include "Rope.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class Player : public Mob {
 public:
@@ -61,7 +61,7 @@ public:
     void god(bool);
 private:
     /// @brief whether or not player is an indestructible god
-    bool god_mode = false;
+    static bool god_mode;
 #endif
 };
 

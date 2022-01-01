@@ -11,7 +11,7 @@ namespace util {
 
 /// @class Random
 /// @brief interface for all RNG
-class Random {
+class Random { // TODO make this inheritable?
 public:
     /// @brief seed with current time
     static void seed();

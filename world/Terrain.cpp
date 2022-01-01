@@ -3,14 +3,16 @@
 #include "Random.hpp"
 
 NAMESPACES
-using mt::exists::Terrain;
+using mt::exst::Terrain;
 
 const int THICKNESS = 6;
 const int OUTLINE_THICKNESS = 3;
 const Color GRASS_COLOR_LIGHT = Color(0, 192, 0);
 const Color GRASS_COLOR_DARK = Color(0, 127, 0);
 
-Terrain::Terrain() {
+Terrain::Terrain(World * world) : Object(world, Coordinate(), 0, 0, 1) {
+    layer_position(1);
+    
     shared_ptr<TerrainVertex> v0(new TerrainVertex(Coordinate(-800, 0)));
     shared_ptr<TerrainVertex> v1(new TerrainVertex(Coordinate(-100, 5)));
     shared_ptr<TerrainVertex> v2(new TerrainVertex(Coordinate(100, 25)));
@@ -34,12 +36,8 @@ Terrain::Terrain() {
     m_edges.push_back(shared_ptr<TerrainEdge>(new TerrainEdge(v5, v6)));
 }
 
-const varray<shared_ptr<TerrainVertex>> & Terrain::vertices() const {
-    return m_vertices;
-}
-
-const varray<shared_ptr<TerrainEdge>> & Terrain::edges() const {
-    return m_edges;
+void Terrain::update() {
+    Object::update();
 }
 
 void Terrain::draw(const Camera * _camera) const {
@@ -88,4 +86,12 @@ void Terrain::draw(const Camera * _camera) const {
 //            _camera->draw_rectangle(GRASS_COLOR_LIGHT, Rectangle(stem_width, stem_width, Coordinate(x, edge_line.y(x)), Random::r_Angle()));
 //        }
 //    }
+}
+
+const varray<shared_ptr<TerrainVertex>> & Terrain::vertices() const {
+    return m_vertices;
+}
+
+const varray<shared_ptr<TerrainEdge>> & Terrain::edges() const {
+    return m_edges;
 }

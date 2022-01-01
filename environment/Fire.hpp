@@ -6,7 +6,7 @@
 #include "Timer.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class Fire : public Object {
 public:

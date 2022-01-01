@@ -5,7 +5,7 @@
 #include "Geometry.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class TerrainVertex;
 class TerrainEdge {

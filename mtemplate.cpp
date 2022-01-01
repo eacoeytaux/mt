@@ -1,7 +1,6 @@
 #include "mtemplate.hpp"
 
 NAMESPACES
-
-using mt::mtemplate;
+using mt::util::mtemplate;
 
 mtemplate::mtemplate() { }

@@ -5,11 +5,11 @@
 #include "Object.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class Rope : public Object {
 public:
-    Rope(World*, const Coordinate & center, float max_length, float growth_SPEED, float retract_SPEED);
+    Rope(World*, const Coordinate & center, float max_length, float growth_speed, float retract_speed);
     
     bool firing() const;
     void firing(bool);

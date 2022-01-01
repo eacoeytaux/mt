@@ -8,7 +8,7 @@
 namespace mt {
 
 const float METER = 32;
-const Vector GRAVITY(0, -2.5);
+const Vector GRAVITY = Vector(0, -2.5);
 
 }
 

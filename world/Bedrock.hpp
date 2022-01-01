@@ -5,11 +5,11 @@
 #include "Terrain.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class Bedrock : public Terrain {
 public:
-    Bedrock();
+    Bedrock(World*);
     
     virtual void draw(const Camera *) const override; // todo add more overrides
     

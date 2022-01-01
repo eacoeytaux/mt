@@ -3,7 +3,7 @@
 #include "Random.hpp"
 
 NAMESPACES
-using mt::exists::Sky;
+using mt::exst::Sky;
 
 Sky::Sky(World* _world, int _cloud_regen_rate) : Object(_world, Coordinate(0, 0)) {
     m_clouds = varray<shared_ptr<Cloud>>();

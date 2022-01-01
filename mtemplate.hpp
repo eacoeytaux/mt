@@ -4,6 +4,7 @@
 #include "mt.hpp"
 
 namespace mt {
+namespace util {
 
 /// @class mtemplate
 /// @brief template file
@@ -16,6 +17,7 @@ private:
     
 };
 
+}
 }
 
 #endif /* mtemplate_hpp */

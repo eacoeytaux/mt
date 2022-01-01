@@ -1,9 +1,12 @@
 #include "Player.hpp"
 
 #include "World.hpp"
+#include "Arrow.hpp"
 
 NAMESPACES
-using mt::exists::Player;
+using mt::exst::Player;
+
+bool Player::god_mode = true;
 
 const float WIDTH = 1.5 * METER;
 const float HEIGHT = 2 * METER;
@@ -28,6 +31,7 @@ m_hook_retract_speed(DEFAULT_HOOK_RETRACT_SPEED),
 m_rope(_world, position(), DEFAULT_ROPE_MAX_LENGTH, DEFAULT_HOOK_GROWTH_SPEED, DEFAULT_HOOK_RETRACT_SPEED) {
     _world->camera_target(position(), true);
     health(100);
+    god(god_mode);
 }
 
 void Player::update_velocity() {
@@ -113,6 +117,10 @@ void Player::update() {
     m_rope.angle(m_aim_angle);
     m_rope.firing(m_firing_hook);
     m_rope.update();
+    
+    if (m_firing_hook) {
+        m_world->add_object(shared_ptr<Object>(new Arrow(m_world, position(), Vector(m_aim_angle /* + ((Random::r_Angle() / 16) - PI / 16) */, 32))));
+    }
 }
 
 void Player::draw(const Camera * _camera) const {

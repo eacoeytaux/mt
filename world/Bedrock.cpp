@@ -1,11 +1,11 @@
 #include "Bedrock.hpp"
 
 NAMESPACES
-using mt::exists::Bedrock;
+using mt::exst::Bedrock;
 
-const Color BEDROCK_COLOR(32, 32, 32);
+const Color BEDROCK_COLOR = Color(32, 32, 32);
 
-Bedrock::Bedrock() : Terrain() { }
+Bedrock::Bedrock(World * world) : Terrain(world) { }
 
 void Bedrock::draw(const Camera * _camera) const {
     if (!Terrain::edges().size()) return;

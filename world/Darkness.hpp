@@ -6,7 +6,7 @@
 #include "Object.hpp"
 
 namespace mt {
-namespace exists {
+namespace exst {
 
 class Darkness : public Visible {
 public:

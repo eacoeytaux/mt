@@ -30,7 +30,7 @@ bool Random::r_bool(const float _true_odds) {
 }
 
 Angle Random::r_Angle() {
-    return Angle(r_float(PI * 2));
+    return Angle(r_float(PI * 2.0));
 }
 
 int Random::r_int(const int _range) {
@@ -44,7 +44,10 @@ int Random::r_int(const int _low_bound, const int _high_bound) {
 }
 
 float Random::r_float(const float _range) {
-    return ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * _range);
+    float rand_float = static_cast<float>(rand());
+    float rand_max = static_cast<float>(RAND_MAX);
+    float rand_ratio = rand_float / rand_max;
+    return (rand_ratio * _range);
 }
 
 float Random::r_float(const float _low_bound, const float _high_bound) {

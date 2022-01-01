@@ -7,12 +7,16 @@
 #include "Tree.hpp"
 
 NAMESPACES
-using mt::exists::World;
+using mt::exst::World;
 
-const float camera_zoom_ratio = 0.9;
+/// @brief how many updates world will run before it is shown
+const int START_AGE = 512;
+/// @brief how much the camera zooms in/out
+const float CAMERA_ZOOM_RATIO = 0.9;
 
 World::World() :
-m_sky(this) {
+m_sky(this),
+m_terrain(this) {
     m_objects = varray<shared_ptr<Object>>(0);
     reset();
 }
@@ -20,30 +24,51 @@ m_sky(this) {
 void World::reset() {
     m_age = 0;
     
-    m_objects.clear();
+    clear_objects();
     m_camera.zoom(1);
     
     m_darkness = Darkness();
     
-    m_wind = Vector(1.5, 0);
+    m_wind = Vector(-1.5, 0);
     m_sky = Sky(this, 200);
+    
+    m_objects.push_back(shared_ptr<Object>(&m_terrain));
     
     for_each (terrain_edge, m_terrain.edges()) {
         int tree_count = Random::r_int(0, 2);
         for_range (tree_count) {
             Coordinate root = terrain_edge->vertex1()->position() + (Vector(terrain_edge->vertex1()->position(), terrain_edge->vertex2()->position()) * Random::r_float(1));
-            m_objects.push_back(shared_ptr<Tree>(new Tree(this, root)));
+            add_object(shared_ptr<Tree>(new Tree(this, root)));
         }
     }
     
     m_player = shared_ptr<Player>(new Player(this, Coordinate(120, 200)));
-    m_objects.push_back(m_player);
+    add_object(m_player);
     
-    m_objects.push_back(shared_ptr<Fire>(new Fire(this, Coordinate(0, 30))));
+    add_object(shared_ptr<Fire>(new Fire(this, Coordinate(0, 30))));
+    
+    for_range(START_AGE) update();
 }
 
 void World::update() {
     ++m_age;
+    
+    // sort object list
+    struct object_less_than {
+        // sort in order of z (includes layers), then x, then y
+        inline bool operator() (const shared_ptr<Object> & obj1, const shared_ptr<Object> & obj2) {
+            if (obj1->z() != obj2->z()) {
+                return (obj1->z() < obj2->z());
+            } else {
+                if (obj1->layer_position() != obj2->layer_position()) return (obj1->layer_position() < obj2->layer_position());
+            }
+            if (obj1->position().x() != obj2->position().x()) return (obj1->position().x() < obj2->position().x());
+            if (obj1->position().y() != obj2->position().y()) return (obj1->position().y() < obj2->position().y());
+            return false;
+        }
+    };
+    
+    sort(m_objects.begin(), m_objects.end(), object_less_than());
     
     // m_terrain.update();
     m_darkness.clear_light_sources();
@@ -52,6 +77,9 @@ void World::update() {
     for_each (object, m_objects) {
         object->update();
     }
+    
+    for_each (object, m_object_queue) m_objects.push_back(object);
+    m_object_queue.clear();
     
     m_camera.update();
      
@@ -108,11 +136,11 @@ void World::camera_height(float _height) {
 }
 
 void World::camera_zoom_in() {
-    m_camera.zoom(m_camera.zoom() / camera_zoom_ratio);
+    m_camera.zoom(m_camera.zoom() / CAMERA_ZOOM_RATIO);
 }
 
 void World::camera_zoom_out() {
-    m_camera.zoom(m_camera.zoom() * camera_zoom_ratio);
+    m_camera.zoom(m_camera.zoom() * CAMERA_ZOOM_RATIO);
 }
 
 const Terrain & World::terrain() const {
@@ -133,6 +161,15 @@ Vector World::wind() const {
 
 void World::wind(const Vector & _WIND) {
     m_wind = _WIND;
+}
+
+void World::clear_objects() {
+    m_objects.clear();
+    m_object_queue.clear();
+}
+
+void World::add_object(shared_ptr<Object> _object) {
+    m_object_queue.push_back(_object);
 }
 
 void World::add_light_source(const Coordinate & _position, const float _distance, const float _flicker) {

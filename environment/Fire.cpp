@@ -4,7 +4,7 @@
 #include "World.hpp"
 
 NAMESPACES
-using mt::exists::Fire;
+using mt::exst::Fire;
 
 const int LIGHT_DISTANCE = 4 * METER;
 const int FLAME_WAIT = 5;

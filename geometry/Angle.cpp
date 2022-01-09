@@ -19,8 +19,9 @@ bool Angle::truncating() const {
     return m_truncate;
 }
 
-void Angle:: truncate(const bool _truncate) {
+Angle & Angle:: truncate(const bool _truncate) {
     m_truncate = _truncate;
+    return *this;
 }
 
 float Angle::radians() const {
@@ -31,7 +32,7 @@ float Angle::degrees() const {
     return (radians() / PI) * 180.0;
 }
 
-void Angle::radians(const float _radians) {
+Angle & Angle::radians(const float _radians) {
     float radians = _radians;
     if ((_radians == POS_INFINITY) || (_radians == NEG_INFINITY)) radians = 0;
     if (truncating()) {
@@ -45,10 +46,12 @@ void Angle::radians(const float _radians) {
 #ifdef MT_DEBUG
     m_degrees = radians_to_degrees(radians);
 #endif
+    return *this;
 }
 
-void Angle::radians(const float _dx, const float _dy) {
+Angle & Angle::radians(const float _dx, const float _dy) {
     radians(atan2(_dy, _dx));
+    return *this;
 }
 
 float Angle::sin(const float _multiplier) const {

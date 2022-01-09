@@ -126,12 +126,12 @@ void SysGraphics::draw_circle(const Colors & _colors, const Circle & _circle, co
     draw_polygon(_colors, Polygon(_circle), _thickness);
 }
 
-//void SysGraphics::draw_shape(const Color & _color, const Shape & _shape, const unsigned int _thickness) {
-//    Colors colors;
-//    for_range (_shape.coordinates().size()) colors.push_back(_color);
-//    draw_shape(colors, _shape, _thickness);
-//}
+void SysGraphics::draw_shape(const Color & _color, const Shape & _shape, const unsigned int _thickness) {
+    Colors colors;
+    for_range (_shape.coordinates().size()) colors.push_back(_color);
+    draw_shape(colors, _shape, _thickness);
+}
 
-//void SysGraphics::draw_shape(const Color & _color, const Shape & _shape, const unsigned int _thickness) {
-// TODO
-//}
+void SysGraphics::draw_shape(const Colors & _colors, const Shape & _shape, const unsigned int _thickness) {
+    draw_polygon(_colors, Polygon(_shape.coordinates()), _thickness);
+}

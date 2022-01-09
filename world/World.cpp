@@ -16,7 +16,7 @@ const float CAMERA_ZOOM_RATIO = 0.9;
 
 World::World() :
 m_sky(this),
-m_terrain(this) {
+m_terrain(shared_ptr<Terrain>(new Terrain(this))) {
     m_objects = varray<shared_ptr<Object>>(0);
     reset();
 }
@@ -27,30 +27,31 @@ void World::reset() {
     clear_objects();
     m_camera.zoom(1);
     
-    m_darkness = Darkness();
+    m_darkness = shared_ptr<Darkness>(new Darkness());
     
     m_wind = Vector(-1.5, 0);
     m_sky = Sky(this, 200);
     
-    m_objects.push_back(shared_ptr<Object>(&m_terrain));
+    m_terrain = shared_ptr<Terrain>(new Terrain(this));
+    m_objects.push_back(m_terrain);
     
-    for_each (terrain_edge, m_terrain.edges()) {
+    for_each (terrain_edge, m_terrain->edges()) {
         int tree_count = Random::r_int(0, 2);
         for_range (tree_count) {
-            Coordinate root = terrain_edge->vertex1()->position() + (Vector(terrain_edge->vertex1()->position(), terrain_edge->vertex2()->position()) * Random::r_float(1));
-            add_object(shared_ptr<Tree>(new Tree(this, root)));
+//            Coordinate root = terrain_edge->vertex1()->position() + (Vector(terrain_edge->vertex1()->position(), terrain_edge->vertex2()->position()) * Random::r_float(1));
+//            add_object(shared_ptr<Tree>(new Tree(this, root)));
         }
     }
-    
-    m_player = shared_ptr<Player>(new Player(this, Coordinate(120, 200)));
-    add_object(m_player);
     
     add_object(shared_ptr<Fire>(new Fire(this, Coordinate(0, 30))));
     
     for_range(START_AGE) update();
+    
+    m_player = shared_ptr<Player>(new Player(this, Coordinate(120, 200)));
+    add_object(m_player);
 }
 
-void World::update() {
+void World::update(float dt) {
     ++m_age;
     
     // sort object list
@@ -70,27 +71,25 @@ void World::update() {
     
     sort(m_objects.begin(), m_objects.end(), object_less_than());
     
-    // m_terrain.update();
-    m_darkness.clear_light_sources();
-    m_sky.update();
+    // m_terrain.update(float dt = 1);
+    m_darkness->clear_light_sources();
+    m_sky.update(dt);
     
-    for_each (object, m_objects) {
-        object->update();
-    }
+    for_each (object, m_objects) object->update(dt);
     
     for_each (object, m_object_queue) m_objects.push_back(object);
     m_object_queue.clear();
     
-    m_camera.update();
+    m_camera.update(dt);
      
 }
 
 void World::draw() const {
     const Camera * camera = &m_camera;
     m_sky.draw(camera);
-    m_terrain.draw(camera);
+//    m_terrain->draw(camera);
     for_each (object, m_objects) object->draw(camera);
-    m_darkness.draw(camera);
+    m_darkness->draw(camera);
     m_player->draw_reticle(camera); // draw reticle above everything else
 #ifdef MT_DEBUG
     if (Debug::on) {
@@ -101,7 +100,7 @@ void World::draw() const {
 }
 
 void World::mouse_movement(const Coordinate & screen_pos) {
-    Coordinate world_pos = screen_pos - (Vector(m_camera.width(), m_camera.height()) / 2) + m_camera.center();
+    Coordinate world_pos = screen_pos - (Vector(m_camera.width(), m_camera.height()) * m_camera.zoom() / 2) + m_camera.center();
     Angle angle_from_player = Vector(m_player->position(), world_pos).angle();
     angle_from_player *= -1;
     m_player->aim(angle_from_player);
@@ -143,15 +142,15 @@ void World::camera_zoom_out() {
     m_camera.zoom(m_camera.zoom() * CAMERA_ZOOM_RATIO);
 }
 
-const Terrain & World::terrain() const {
+const shared_ptr<Terrain> World::terrain() const {
     return m_terrain;
 }
 
 void World::lights(bool _lights) {
     if (_lights) {
-        m_darkness.darkness_intensity(0);
+        m_darkness->darkness_intensity(0);
     } else {
-        m_darkness.darkness_intensity(1);
+        m_darkness->darkness_intensity(1);
     }
 }
 
@@ -173,5 +172,5 @@ void World::add_object(shared_ptr<Object> _object) {
 }
 
 void World::add_light_source(const Coordinate & _position, const float _distance, const float _flicker) {
-    m_darkness.add_light_source(_position, _distance, _flicker);
+    m_darkness->add_light_source(_position, _distance, _flicker);
 }

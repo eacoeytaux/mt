@@ -53,16 +53,34 @@ Polygon::Polygon(int _side_count, float _radius, const Coordinate & _center, Ang
     *this = Polygon(coordinate_offsets, _center);
 }
 
-void Polygon::rotate_around_origin(const Angle & _angle, const Coordinate & _origin) {
+Shape & Polygon::move(const Vector & _vector) {
     varray<Coordinate> new_coordinates;
     for_each (coordinate, coordinates()) {
-        Vector coor_pos = Vector(coordinate);
-        coor_pos -= _origin;
-        coor_pos.rotate(_angle);
-        coor_pos += _origin;
-        new_coordinates.push_back(coor_pos.destination());
+        new_coordinates.push_back(coordinate + _vector);
     }
     *this = Polygon(new_coordinates);
+    return *this;
+}
+
+Shape & Polygon::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+    varray<Coordinate> new_coordinates;
+    for_each (coordinate, coordinates()) {
+        new_coordinates.push_back(coordinate.rotate_about(_angle, _origin));
+    }
+    *this = Polygon(new_coordinates);
+    return *this;
+}
+
+float Polygon::area() const {
+    float ret = 0;
+    for_each (triangle, triangles()) {
+        ret += triangle.area();
+    }
+    return ret;
+}
+
+int Polygon::sides() const {
+    return (int)coordinates().size();
 }
 
 float Polygon::lower_bound_x() const {
@@ -131,4 +149,15 @@ bool Polygon::operator==(const Polygon & _polygon) const {
 
 bool Polygon::operator!=(const Polygon & _polygon) const {
     return !(*this == _polygon);
+}
+
+void Polygon::split_into_convexes(const varray<Coordinate> & _coordinates) {
+    Assert::fatal(_coordinates.size() >= 3);
+    
+    if (_coordinates.size() == 3) {
+        m_splits.push_back(Polygon(_coordinates));
+    }
+    
+    // TODO
+    m_splits.push_back(Polygon(_coordinates));
 }

@@ -24,17 +24,17 @@ public:
     /// @return whether or not angle is truncating radians
     bool truncating() const;
     /// @param truncate whether or not angle should truncate radians
-    void truncate(const bool truncate);
+    Angle & truncate(const bool truncate);
     
     /// @return angle in radians
     float radians() const;
     /// @return angle in degrees
     float degrees() const;
     /// @param radians new radian value
-    void radians(const float radians);
+    Angle & radians(const float radians);
     /// @param dx new delta x
     /// @param dy new delta y
-    void radians(const float dx, const float dy);
+    Angle & radians(const float dx, const float dy);
     /// @brief sin value of angle
     /// @param multiplier multiply sin value by this
     float sin(const float multiplier = 1.0) const;

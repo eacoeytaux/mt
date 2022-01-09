@@ -12,7 +12,7 @@ Rectangle::Rectangle(const float _width, const float _height, const Coordinate &
     center(_center);
     width(_width);
     height(_height);
-    rotate_to(_rotation);
+    rotate_about(_rotation, center());
 }
 
 Rectangle::Rectangle(const Coordinate & _c1, const Coordinate & _c2, const Angle & _rotation) {
@@ -38,47 +38,50 @@ Coordinate Rectangle::center() const {
     return m_center;
 }
 
-void Rectangle::center(const Coordinate & _center) {
+Rectangle & Rectangle::center(const Coordinate & _center) {
     m_center = _center;
+    return *this;
 }
 
 float Rectangle::width() const {
     return m_width;
 }
 
-void Rectangle::width(const float _width) {
+Rectangle & Rectangle::width(const float _width) {
     m_width = _width;
+    return *this;
 }
 
 float Rectangle::height() const {
     return m_height;
 }
 
-void Rectangle::height(const float _height) {
+Rectangle & Rectangle::height(const float _height) {
     m_height = _height;
+    return *this;
 }
 
 Angle Rectangle::rotation() const {
     return m_rotation;
 }
 
-void Rectangle::rotate_to(const Angle & _rotation) {
-    m_rotation = _rotation;
-}
-
-void Rectangle::rotate(const Angle & _d_angle) {
-    rotate_to(rotation() + _d_angle);
-}
-
-void Rectangle::move(const Vector & _v) {
+Shape & Rectangle::move(const Vector & _v) {
     center(center() + _v);
+    return *this;
 }
 
-void Rectangle::rotate_around_origin(const Angle & _d_angle, const Coordinate & _origin) {
-    Vector v(_origin, center());
-    v.rotate(_d_angle);
-    center(v.destination());
-    rotate_to(rotation() + _d_angle);
+Shape & Rectangle::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+    center(center().rotate_about(_angle, _origin));
+    m_rotation += _angle;
+    return *this;
+}
+
+float Rectangle::area() const {
+    return width() * height();
+}
+
+int Rectangle::sides() const {
+    return 4;
 }
 
 Coordinate Rectangle::top_right() const {
@@ -139,10 +142,6 @@ float Rectangle::upper_bound_y() const {
 
 float Rectangle::diagonal_length() const {
     return top_left().distance(bottom_right());
-}
-
-float Rectangle::area() const {
-    return width() * height();
 }
 
 bool Rectangle::contains(const Coordinate & _coordinate) const {

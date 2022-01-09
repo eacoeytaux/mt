@@ -18,19 +18,21 @@ public:
     Circle(float radius = 0, const Coordinate & center = Coordinate());
     
     Coordinate center() const;
-    void center(const Coordinate & center);
+    Circle & center(const Coordinate & center);
     float radius() const;
-    void radius(float radius);
+    Circle & radius(float radius);
     float diameter() const;
-    void diameter(float diameter);
+    Circle & diameter(float diameter);
     
-    void move(const Vector & vector);
+    Shape & move(const Vector & vector) override;
+    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
     
     float lower_bound_x() const;
     float lower_bound_y() const;
     float upper_bound_x() const;
     float upper_bound_y() const;
-    float area() const;
+    float area() const override;
+    int sides() const override;
     
     bool contains(const Coordinate &) const;
     
@@ -42,10 +44,10 @@ public:
 //    bool intersects(const Line &) const;
 //    Line intersection(const Line &) const;
     
-    varray<Coordinate> coordinates() const;
-    varray<Line> lines() const;
+    varray<Coordinate> coordinates() const override;
+    varray<Line> lines() const override;
     varray<Line> arc(const Angle &, const Angle & = Angle(0)) const;
-    varray<Triangle> triangles() const;
+    varray<Triangle> triangles() const override;
     varray<Triangle> triangles(const unsigned int precision) const;
     
     float convert_to_radians(float distance) const;

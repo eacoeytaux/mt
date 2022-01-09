@@ -31,7 +31,7 @@ public:
     static void draw_circle(const Color &, const Circle &, const unsigned int thickness = FILLED);
     static void draw_circle(const Colors &, const Circle &, const unsigned int thickness = FILLED);
     static void draw_shape(const Color &, const Shape &, const unsigned int thickness = FILLED);
-//    static void draw_shape(const Colors &, const Shape &, const unsigned int thickness = FILLED);
+    static void draw_shape(const Colors &, const Shape &, const unsigned int thickness = FILLED);
 
 private:
     SysGraphics() { }

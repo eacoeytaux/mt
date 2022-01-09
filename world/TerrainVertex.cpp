@@ -13,10 +13,10 @@ Coordinate TerrainVertex::position() const {
     return m_pos;
 }
 
-TerrainEdge * TerrainVertex::edge1() const {
+shared_ptr<TerrainEdge> TerrainVertex::edge1() const {
     return m_e1;
 }
 
-TerrainEdge * TerrainVertex::edge2() const {
+shared_ptr<TerrainEdge> TerrainVertex::edge2() const {
     return m_e2;
 }

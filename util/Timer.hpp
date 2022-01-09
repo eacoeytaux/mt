@@ -24,8 +24,9 @@ public:
     }
     
     /// @param countdown value to start countdown from
-    void reset(const uint64_t countdown) {
+    Timer & reset(const uint64_t countdown) {
         m_countdown = countdown;
+        return *this;
     }
 
     /// @return remaining ticks in countdown

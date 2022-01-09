@@ -29,40 +29,40 @@ public:
     /// @return delta x
     float dx() const;
     /// @param dx new delta x
-    void dx(float dx);
+    Vector & dx(float dx);
     /// @return delta y
     float dy() const;
     /// @param dy new delta y
-    void dy(float dy);
+    Vector & dy(float dy);
     /// @param dx delta x
     /// @param dy delta y
-    void dxdy(float dx, float dy);
+    Vector & dxdy(float dx, float dy);
     /// @return origin of vector
     Coordinate origin() const;
     /// @param origin new origin of vector
-    void origin(const Coordinate & origin);
+    Vector & origin(const Coordinate & origin);
     /// @return destination of vector
     Coordinate destination() const;
     /// @param destination new destination of vector
-    void destination(const Coordinate destination);
+    Vector & destination(const Coordinate destination);
     /// @return length of vector
     float magnitude() const;
     /// @param magnitude new length of vector
-    void magnitude(float magnitude);
+    Vector & magnitude(float magnitude);
     /// @brief sets new length of vector
     /// @param length new length of vector
-    void extend(float length);
+    Vector & extend(float length);
     
     /// @return angle of vector
     Angle angle() const;
     /// @param angle angle to rotate to
-    void rotate_to_angle(const Angle & angle);
+    Vector & rotate_to_angle(const Angle & angle);
     /// @param rotation angle to rotate by
-    void rotate(const Angle & rotation);
+    Vector & rotate(const Angle & rotation);
     /// @brief mirrors across x axis
-    void mirror_horizontal();
+    Vector & mirror_horizontal();
     /// @brief mirrors across y axis
-    void mirror_vertical();
+    Vector & mirror_vertical();
     
 //    template<typename T>
 //    void move(varray<T> & elements) const {

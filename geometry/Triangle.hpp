@@ -12,7 +12,7 @@ class Triangle : public Shape {
 public:
     Triangle(const Coordinate & c1 = Coordinate(0, 0), const Coordinate & c2 = Coordinate(0, 0), const Coordinate & c3 = Coordinate(0, 0));
     Triangle(const Vector & offset1, const Vector & offset2, const Vector & offset3, const Coordinate & origin);
-
+    
     Coordinate c1() const;
     Coordinate c2() const;
     Coordinate c3() const;
@@ -20,11 +20,16 @@ public:
     Line line1() const;
     Line line2() const;
     Line line3() const;
-    float area() const;
     
-    varray<Coordinate> coordinates() const;
-    varray<Line> lines() const;
-    varray<Triangle> triangles() const;
+    varray<Coordinate> coordinates() const override;
+    varray<Line> lines() const override;
+    varray<Triangle> triangles() const override;
+    
+    float area() const override;
+    int sides() const override;
+    
+    Shape & move(const Vector &) override;
+    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
     
     Triangle operator+(const Vector &) const;
     Triangle & operator+=(const Vector &);

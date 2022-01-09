@@ -14,32 +14,37 @@ Coordinate Circle::center() const {
     return m_center;
 }
 
-void Circle::center(const Coordinate & _center) {
+Circle & Circle::center(const Coordinate & _center) {
     m_center = _center;
+    return *this;
 }
 
 float Circle::radius() const {
     return m_radius;
 }
 
-void Circle::radius(float _radius) {
+Circle & Circle::radius(float _radius) {
     m_radius = _radius;
+    return *this;
 }
 
 float Circle::diameter() const {
     return radius() * 2;
 }
 
-void Circle::diameter(float _diameter) {
+Circle & Circle::diameter(float _diameter) {
     radius(_diameter / 2);
+    return *this;
 }
 
-void Circle::move(const Vector & vector) {
+Shape & Circle::move(const Vector & vector) {
     center(center() + vector);
+    return *this;
 }
 
-float Circle::area() const {
-    return PI * pow(radius(), 2);
+Shape & Circle::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+    center(center().rotate_about(_angle, _origin));
+    return *this;
 }
 
 float Circle::lower_bound_x() const {
@@ -56,6 +61,14 @@ float Circle::upper_bound_x() const {
 
 float Circle::upper_bound_y() const {
     return center().y() + m_radius;
+}
+
+float Circle::area() const {
+    return PI * pow(radius(), 2);
+}
+
+int Circle::sides() const {
+    return CIRCLE_PRECISION;
 }
 
 bool Circle::contains(const Coordinate & _c) const {

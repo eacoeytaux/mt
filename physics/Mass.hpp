@@ -13,17 +13,15 @@ namespace physics {
 class Mass {
 public:
     virtual ~Mass() { }
-    Mass(const Coordinate & position = Coordinate(0, 0), const float mass = 0);
-    
-    void move();
+    Mass(const Coordinate & position = Coordinate(0, 0), const Vector & velocity = Vector(0, 0), const float mass = 0);
     
     float mass() const;
-    void mass(const float mass);
+    Mass & mass(const float mass);
     Coordinate position() const;
-    void position(const Coordinate & position);
+    Mass & position(const Coordinate & position);
     Vector velocity() const;
-    void velocity(const Vector & velocity);
-    void add_velocity(const Vector & velocity);
+    Mass & velocity(const Vector & velocity);
+    Mass & add_velocity(const Vector & velocity);
     
 private:
     float m_mass;

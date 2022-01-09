@@ -28,38 +28,43 @@ unsigned char Color::r() const {
     return m_r;
 }
 
-void Color::r(unsigned char _r) {
+Color & Color::r(unsigned char _r) {
     m_r = _r;
+    return *this;
 }
 
 unsigned char Color::g() const {
     return m_g;
 }
 
-void Color::g(unsigned char _g) {
+Color & Color::g(unsigned char _g) {
     m_g = _g;
+    return *this;
 }
 
 unsigned char Color::b() const {
     return m_b;
 }
 
-void Color::b(unsigned char _b) {
+Color & Color::b(unsigned char _b) {
     m_b = _b;
+    return *this;
 }
 
 unsigned char Color::a() const {
     return m_a;
 }
 
-void Color::a(unsigned char _a) {
+Color & Color::a(unsigned char _a) {
     m_a = _a;
+    return *this;
 }
 
-void Color::inverse() {
+Color & Color::inverse() {
     m_r = 255 - m_r;
     m_g = 255 - m_g;
     m_b = 255 - m_b;
+    return *this;
 }
 
 bool Color::operator==(const Color & color) const {

@@ -7,15 +7,15 @@ NAMESPACES
 using mt::exst::Cloud;
 
 const float X_STRETCH = 2;
-const int MIN_SMALL_PUFF_COUNT = 16;
-const int MAX_SMALL_PUFF_COUNT = 24;
+const int MIN_SMALL_PUFF_COUNT = 10;
+const int MAX_SMALL_PUFF_COUNT = 16;
 const int MIN_SMALL_PUFF_RADIUS = 8;
 const int MAX_SMALL_PUFF_RADIUS = 20;
 const float MAX_SMALL_PUFF_DISTANCE = 80;
 const int MIN_LARGE_PUFF_COUNT = 16;
 const int MAX_LARGE_PUFF_COUNT = 24;
 const int MIN_LARGE_PUFF_RADIUS = 25;
-const int MAX_LARGE_PUFF_RADIUS = 50;
+const int MAX_LARGE_PUFF_RADIUS = 64;
 const float MAX_LARGE_PUFF_DISTANCE = 60;
 const float PUFF_OUTLINE_RATIO = 0.64;
 const Color INSIDE_COLOR = Color(135, 206, 235);
@@ -26,7 +26,7 @@ Cloud::_puff::_puff(float _RADIUS, const Vector & _center_offset) {
 }
 
 Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
-    gravity_affected(false);
+    gravity_ratio(0);
     
     Object::width(max_dx());
     Object::height(max_dy());
@@ -43,7 +43,7 @@ Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
     
     int small_puff_count = Random::r_int(MIN_SMALL_PUFF_COUNT, MAX_SMALL_PUFF_COUNT);
     for_range (small_puff_count) {
-        Vector offset(Random::r_Angle(), Random::r_float(MAX_SMALL_PUFF_DISTANCE));
+        Vector offset(Random::r_Angle(), Random::r_float(MAX_LARGE_PUFF_DISTANCE, MAX_SMALL_PUFF_DISTANCE));
         offset.dx(offset.dx() * X_STRETCH);
         m_puffs.push_back(_puff(Random::r_int(MIN_SMALL_PUFF_RADIUS, MAX_SMALL_PUFF_RADIUS), offset));
     }
@@ -64,16 +64,18 @@ float Cloud::max_dy() const {
     return max(MAX_SMALL_PUFF_RADIUS + MAX_SMALL_PUFF_DISTANCE, MAX_LARGE_PUFF_RADIUS + MAX_LARGE_PUFF_DISTANCE) * 2;
 }
 
-void Cloud::update() {
-    move();
+void Cloud::update(float dt) {
+    move(dt);
 }
 
 void Cloud::draw(const Camera * _camera) const {
     for_each (puff, m_puffs) {
         _camera->draw_circle(WHITE, Circle(puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
+//        _camera->draw_rectangle(WHITE, Rectangle(puff.m_radius, puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
     }
     for_each (puff, m_puffs) {
-        _camera->draw_circle(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO,  position() + puff.m_center_offset), FILLED, m_z);
+        _camera->draw_circle(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, m_z);
+//        _camera->draw_rectangle(INSIDE_COLOR, Rectangle(puff.m_radius * PUFF_OUTLINE_RATIO, puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, m_z);
     }
     
     Object::draw(_camera);

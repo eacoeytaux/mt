@@ -29,22 +29,22 @@ public:
     /// @return red
     unsigned char r() const;
     /// @param r red
-    void r(unsigned char r);
+    Color & r(unsigned char r);
     /// @return green
     unsigned char g() const;
     /// @param g green
-    void g(unsigned char g);
+    Color & g(unsigned char g);
     /// @return blue
     unsigned char b() const;
     /// @param b blue
-    void b(unsigned char b);
+    Color & b(unsigned char b);
     /// @return alpha
     unsigned char a() const;
     /// @param a alpha
-    void a(unsigned char a);
+    Color & a(unsigned char a);
     
     /// @brief inverse all RGB values i.e. value = (255 - value)
-    void inverse();
+    Color & inverse();
     
     bool operator==(const Color &) const;
     bool operator!=(const Color &) const;
@@ -57,6 +57,8 @@ private:
 };
 
 typedef varray<Color> Colors;
+
+const Color CLEAR(0, 0, 0, 0);
 
 const Color WHITE(255, 255, 255);
 const Color GRAY_LIGHT(192, 192, 192);

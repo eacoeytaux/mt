@@ -1,8 +1,13 @@
 #include "mt_main.hpp"
 
-///
-/// @brief main entry point
-///
-int main(int argc, const char * argv[]) {
-    mt::MTROGUE::run();
+#ifdef MT_DEBUG
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+#endif
+
+int main(int argc, char * argv[]) {
+#ifdef MT_DEBUG
+if (catch_main(argc, argv)) return 1;
+#endif
+mt::MTAPP::run();
 }

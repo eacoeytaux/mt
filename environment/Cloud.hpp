@@ -22,7 +22,7 @@ public:
     float max_dx() const;
     float max_dy() const;
     
-    void update();
+    void update(float dt = 1);
     void draw(const Camera *) const;
     
 private:

@@ -10,17 +10,21 @@ namespace exst {
 class TerrainVertex;
 class TerrainEdge {
 public:
-    friend class TerrainVertex;
-    TerrainEdge(shared_ptr<TerrainVertex> v1, shared_ptr<TerrainVertex> v2);
+    friend class Terrain;
+    TerrainEdge(shared_ptr<TerrainVertex> v1, shared_ptr<TerrainVertex> v2, float resistance = 0.99);
     TerrainEdge(const TerrainEdge &);
     
     Line line() const;
-    TerrainVertex * vertex1() const;
-    TerrainVertex * vertex2() const;
+    shared_ptr<TerrainVertex> vertex1() const;
+    shared_ptr<TerrainVertex> vertex2() const;
+    
+    float resistance() const;
     
 private:
-    TerrainVertex * m_v1 = nullptr;
-    TerrainVertex * m_v2 = nullptr;
+    shared_ptr<TerrainVertex> m_v1 = nullptr;
+    shared_ptr<TerrainVertex> m_v2 = nullptr;
+    
+    float m_resistance;
 };
 
 }

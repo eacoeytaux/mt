@@ -42,9 +42,10 @@ public:
     }
     
     /// @param value new value of slider
-    void value(const T & value) {
+    Slider & value(const T & value) {
         Assert::fatal((value <= m_max) && (value >= 0), "value must be in range");
         m_value = value;
+        return *this;
     }
     
     /// @return percentage of value from minimum value to maximum value
@@ -53,9 +54,10 @@ public:
     }
     
     /// @param percentage set value to percentage between minimum value (0) and maximum value (1)
-    void percentage(const float percentage) {
+    Slider & percentage(const float percentage) {
         Assert::fatal((percentage <= 1) && (percentage >= 0), "percentage (%f) should not be outside bounds [0,0]", percentage);
         m_value = ((m_max - m_min) * percentage) + m_min;
+        return *this;
     }
     
 private:

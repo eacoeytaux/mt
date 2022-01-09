@@ -15,16 +15,18 @@ float Coordinate::x() const {
     return m_x;
 }
 
-void Coordinate::x(float _x) {
+Coordinate & Coordinate::x(float _x) {
     m_x = _x;
+    return *this;
 }
 
 float Coordinate::y() const {
     return m_y;
 }
 
-void Coordinate::y(float _y) {
+Coordinate & Coordinate::y(float _y) {
     m_y = _y;
+    return *this;
 }
 
 float Coordinate::distance(const Coordinate & c) const {
@@ -35,6 +37,13 @@ float Coordinate::distance(const Coordinate & c) const {
     else if (dy == 0)
         return abs(dx);
     return sqrt(pow(dx, 2) + pow(dy, 2));
+}
+
+Coordinate & Coordinate::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+    Vector v = Vector(_origin, *this);
+    v.rotate(_angle);
+    *this = v.destination();
+    return *this;
 }
 
 QUADRANT Coordinate::quadrant() const {

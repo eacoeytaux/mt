@@ -12,7 +12,7 @@ class Fire : public Object {
 public:
     Fire(World*, const Coordinate & center);
     
-    void update();
+    void update(float dt = 1);
     void draw(const Camera *) const;
     
 private:

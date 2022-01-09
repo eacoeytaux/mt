@@ -37,29 +37,33 @@ float Vector::dx() const {
     return m_dx;
 }
 
-void Vector::dx(float _dx) {
+Vector & Vector::dx(float _dx) {
     m_dx = _dx;
+    return *this;
 }
 
 float Vector::dy() const {
     return m_dy;
 }
 
-void Vector::dy(float _dy) {
+Vector & Vector::dy(float _dy) {
     m_dy = _dy;
+    return *this;
 }
 
-void Vector::dxdy(float _dx, float _dy) {
+Vector & Vector::dxdy(float _dx, float _dy) {
     dx(_dx);
     dy(_dy);
+    return *this;
 }
 
 Coordinate Vector::origin() const {
     return m_origin;
 }
 
-void Vector::origin(const Coordinate & _origin) {
+Vector & Vector::origin(const Coordinate & _origin) {
     m_origin = _origin;
+    return *this;
 }
 
 Coordinate Vector::destination() const {
@@ -69,47 +73,54 @@ Coordinate Vector::destination() const {
     return destination;
 }
 
-void Vector::destination(Coordinate _destination) {
+Vector & Vector::destination(Coordinate _destination) {
     dx(_destination.x() - m_origin.x());
     dy(_destination.y() - m_origin.y());
+    return *this;
 }
 
 float Vector::magnitude() const {
     return origin().distance(destination());
 }
 
-void Vector::magnitude(float magnitude) {
+Vector & Vector::magnitude(float magnitude) {
     Angle a = angle();
     dx(a.cos(magnitude));
     dy(a.sin(magnitude));
+    return *this;
 }
 
-void Vector::extend(float length) {
+Vector & Vector::extend(float length) {
     magnitude(magnitude() + length);
+    return *this;
 }
 
 Angle Vector::angle() const {
     return Angle(m_dx, m_dy);
 }
 
-void Vector::rotate_to_angle(const Angle & _angle) {
+Vector & Vector::rotate_to_angle(const Angle & _angle) {
     if (angle() != _angle) {
         float _magnitude = magnitude();
         dx(_angle.cos() * _magnitude);
         dy(_angle.sin() * _magnitude);
     }
+    return *this;
 }
 
-void Vector::rotate(const Angle & _d_angle) {
+Vector & Vector::rotate(const Angle & _d_angle) {
     rotate_to_angle(angle() + _d_angle);
+    return *this;
 }
 
-void Vector::mirror_horizontal() {
+Vector & Vector::mirror_horizontal() {
     m_dx *= -1;
+    return *this;
 }
 
-void Vector::mirror_vertical() {
+Vector & Vector::mirror_vertical() {
     m_dy *= -1;
+    return *this;
 }
 
 Vector Vector::operator+(const Vector & v) const {

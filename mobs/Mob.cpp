@@ -5,8 +5,16 @@ using mt::exst::Mob;
 
 Mob::Mob(World* _world, const Coordinate & _center, const float _width, const float _height) : Object(_world, _center, _width, _height) { }
 
-void Mob::update() {
-    Object::update();
+void Mob::update(float dt) {
+    Object::update(dt);
+}
+
+void Mob::adjust_velocity(float dt) {
+    Object::adjust_velocity(dt);
+}
+
+void Mob::move(float dt) {
+    Object::move(dt);
 }
 
 void Mob::draw(const Camera * _camera) const {

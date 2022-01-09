@@ -11,6 +11,11 @@ class Rope : public Object {
 public:
     Rope(World*, const Coordinate & center, float max_length, float growth_speed, float retract_speed);
     
+    void update(float dt = 1) override;
+    void draw(const Camera *) const override;
+    
+    Coordinate hook_position() const;
+    
     bool firing() const;
     void firing(bool);
     Angle angle() const;
@@ -20,10 +25,10 @@ public:
     float max_length() const;
     void max_length(float);
     
-    void update();
-    void draw(const Camera *) const;
-    
 private:
+    void adjust_velocity(float dt) override;
+    void move(float dt) override;
+    
     bool m_firing = false;
     Angle m_angle;
     float m_length;

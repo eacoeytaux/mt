@@ -37,15 +37,6 @@ Line Triangle::line3() const {
     return Line(c3(), c1());
 }
 
-float Triangle::area() const {
-    // Heron's formula
-    float a = line1().length();
-    float b = line2().length();
-    float c = line3().length();
-    float s = (a + b + c) / 2;
-    return sqrt(s * (s - a) * (s - b) * (s - c));
-}
-
 varray<Coordinate> Triangle::coordinates() const {
     return varray<Coordinate>({ c1(), c2(), c3() });
 }
@@ -56,6 +47,31 @@ varray<Line> Triangle::lines() const {
 
 varray<Triangle> Triangle::triangles() const {
     return { *this };
+}
+
+float Triangle::area() const {
+    // Heron's formula
+    float a = line1().length();
+    float b = line2().length();
+    float c = line3().length();
+    float s = (a + b + c) / 2;
+    return sqrt(s * (s - a) * (s - b) * (s - c));
+}
+
+int Triangle::sides() const {
+    return 3;
+}
+
+Shape & Triangle::move(const Vector & _vector) {
+    m_c1 += _vector;
+    m_c2 += _vector;
+    m_c3 += _vector;
+    return *this;
+}
+
+Shape & Triangle::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+    m_c1.rotate_about(_angle, _origin);
+    return *this;
 }
 
 Triangle Triangle::operator+(const Vector & _v) const {

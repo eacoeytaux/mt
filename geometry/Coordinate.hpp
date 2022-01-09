@@ -41,16 +41,20 @@ public:
     /// @return x
     float x() const;
     /// @param x x
-    void x(float x);
+    Coordinate & x(float x);
     
     /// @return y
     float y() const;
     /// @param y y
-    void y(float y);
+    Coordinate & y(float y);
     
     /// @param coordinate coordinate to measure distance from
     /// @return distance from coordinate
     float distance(const Coordinate & coordinate) const;
+    
+    /// @param angle angle to rotate by
+    /// @param origin origin to rotate around, default true origin
+    Coordinate & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0));
     
     /// @return which quadrant coordinate is in if any
     QUADRANT quadrant() const;

@@ -18,9 +18,9 @@ class TerrainEdge;
 /// @brief object that exists in world, super descriptive I know
 class Object : public Mass, public Visible {
 public:
-    Object(World*, const Coordinate & position, const float width = 0, const float height = 0, const float z = 1, const Vector & velocity = Vector(0, 0));
+    Object(World *, const Coordinate & position, const float width = 0, const float height = 0, const float z = 1, const Vector & velocity = Vector(0, 0));
     
-    virtual void update();
+    virtual void update(float dt = 1);
     virtual void draw(const Camera *) const;
     virtual void draw_shadow(const Camera *) const;
     
@@ -31,8 +31,8 @@ public:
     float z() const;
     void z(const float);
     
-    bool gravity_affected() const;
-    void gravity_affected(bool);
+    float gravity_ratio() const;
+    void gravity_ratio(float);
     bool terrarin_boundaries() const;
     void terrarin_boundaries(bool);
     
@@ -41,11 +41,17 @@ public:
     virtual void draw_visable_box(const Camera *) const;
 #endif
     
+private:
+    /// @brief handles all movement updates
+    virtual void update_move(float dt);
+    
 protected:
     /// @brief make any altercations to velocity
-    virtual void update_velocity();
+    virtual void adjust_velocity(float dt);
     /// @brief move object through world
-    virtual void move();
+    virtual void move(float dt);
+    /// @brief restitance ratio \(0, 1]
+    virtual float resistance() const;
     
     /// @brief world object exists in
     World* m_world;
@@ -57,8 +63,8 @@ protected:
     /// @brief z value in world, which corresponds to parallax perspective (1 is playable plane)
     float m_z;
     
-    /// @brief set to true for objects that fall
-    bool m_gravity_affected;
+    float m_gravity_ratio = 1;
+    
     /// @brief set to true for objects that cannot pass through terrarin
     bool m_terrarin_boundaries;
     /// @brief set to false for background objects and vampires

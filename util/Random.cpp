@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "SysTime.hpp"
 #include "Angle.hpp"
+#include "Color.hpp"
 
 NAMESPACES
 using mt::util::Random;
@@ -53,4 +54,8 @@ float Random::r_float(const float _range) {
 float Random::r_float(const float _low_bound, const float _high_bound) {
     Assert::soft(_high_bound >= _low_bound, "incorrect bounds");
     return r_float(_high_bound - _low_bound) + _low_bound;
+}
+
+Color Random::r_Color() {
+    return Color(Random::r_int(256), Random::r_int(256), Random::r_int(256));
 }

@@ -22,16 +22,20 @@ public:
     Polygon(const Rectangle &);
     Polygon(int side_count, float radius, const Coordinate & center = Coordinate(0, 0), Angle rotation = Angle(0)); // creates equilateral
     
-    void rotate_around_origin(const Angle &, const Coordinate & origin = Coordinate(0, 0));
+    Shape & move(const Vector & vector) override;
+    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    
+    float area() const override;
+    int sides() const override;
     
     float lower_bound_x() const;
     float lower_bound_y() const;
     float upper_bound_x() const;
     float upper_bound_y() const;
     
-    varray<Coordinate> coordinates() const;
-    varray<Line> lines() const;
-    varray<Triangle> triangles() const;
+    varray<Coordinate> coordinates() const override;
+    varray<Line> lines() const override;
+    varray<Triangle> triangles() const override;
     
     Polygon operator+(const Vector &) const;
     Polygon & operator+=(const Vector &);
@@ -44,10 +48,14 @@ public:
 private:
     Coordinate m_origin;
     varray<Coordinate> m_coordinates;
+    bool m_convex;
     float m_lower_bound_x = 0;
     float m_lower_bound_y = 0;
     float m_upper_bound_x = 0;
     float m_upper_bound_y = 0;
+    
+    void split_into_convexes(const varray<Coordinate> & coordinates);
+    varray<Polygon> m_splits;
 };
 
 }

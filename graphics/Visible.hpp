@@ -19,7 +19,7 @@ public:
     
     Visible(uint layer_position = 0) : m_layer_position(layer_position) { }
     uint layer_position() const { return m_layer_position; }
-    void layer_position(uint layer_position) { m_layer_position = layer_position; }
+    Visible & layer_position(uint layer_position) { m_layer_position = layer_position; return *this; }
 private:
     uint m_layer_position;
 };

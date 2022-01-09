@@ -14,7 +14,7 @@ class Camera {
 public:
     Camera(const Coordinate & center = Coordinate(), float width = 0, float height = 0, float zoom = 1);
     
-    void update();
+    void update(float dt = 1);
     
     Rectangle screen() const;
     

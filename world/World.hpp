@@ -11,6 +11,7 @@
 #include "Object.hpp"
 #include "Darkness.hpp"
 #include "Terrain.hpp"
+#include "BackgroundTerrain.hpp"
 #include "Sky.hpp"
 
 #include "Player.hpp"
@@ -26,7 +27,7 @@ public:
     
     void reset();
     
-    void update();
+    void update(float dt = 1);
     void draw() const;
     
     void mouse_movement(const Coordinate & screen_pos);
@@ -42,7 +43,7 @@ public:
     void camera_zoom_in();
     void camera_zoom_out();
     
-    const Terrain & terrain() const;
+    const shared_ptr<Terrain> terrain() const;
     bool lights() const;
     void lights(bool);
     Vector wind() const;
@@ -63,8 +64,9 @@ private:
     Camera m_camera;
     varray<shared_ptr<Object>> m_objects;
     varray<shared_ptr<Object>> m_object_queue;
-    Darkness m_darkness;
-    Terrain m_terrain;
+    shared_ptr<Darkness> m_darkness;
+    shared_ptr<Terrain> m_terrain;
+    shared_ptr<BackgroundTerrain> m_background_terrain;
     Vector m_wind;
     Sky m_sky;
 };

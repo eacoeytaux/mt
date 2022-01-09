@@ -10,17 +10,17 @@ namespace exst {
 class TerrainEdge;
 class TerrainVertex {
 public:
-    friend class TerrainEdge;
+    friend class Terrain;
     TerrainVertex(const Coordinate & pos);
     
     Coordinate position() const;
-    TerrainEdge * edge1() const;
-    TerrainEdge * edge2() const;
+    shared_ptr<TerrainEdge> edge1() const;
+    shared_ptr<TerrainEdge> edge2() const;
     
 private:
     Coordinate m_pos;
-    TerrainEdge * m_e1 = nullptr;
-    TerrainEdge * m_e2 = nullptr;
+    shared_ptr<TerrainEdge> m_e1 = nullptr;
+    shared_ptr<TerrainEdge> m_e2 = nullptr;
 };
 
 }

@@ -6,6 +6,7 @@
 namespace mt {
 
 namespace geometry { class Angle; }
+namespace graphics { class Color; }
 
 namespace util {
 
@@ -37,6 +38,9 @@ public:
     /// @brief random float
     /// @return random float in range [low_bound, high_bound)
     static float r_float(float low_bound, float high_bound);
+    /// @brief random color
+    /// @return random color
+    static Color r_Color();
     
 private:
     /// @brief should never be constructed

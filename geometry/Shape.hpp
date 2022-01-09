@@ -15,12 +15,13 @@ class Triangle;
 
 class Shape {
 public:
-    virtual float area() const;
-    virtual int sides() const;
-    virtual varray<Coordinate> coordinates() const;
-    virtual varray<Line> lines() const;
-    virtual varray<Triangle> triangles() const;
-    virtual void move(const Vector &);
+    virtual float area() const = 0;
+    virtual int sides() const = 0;
+    virtual varray<Coordinate> coordinates() const = 0;
+    virtual varray<Line> lines() const = 0;
+    virtual varray<Triangle> triangles() const = 0;
+    virtual Shape & move(const Vector &) = 0;
+    virtual Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) = 0;
     
     virtual bool operator==(const Shape &) const;
     virtual bool operator!=(const Shape &) const;

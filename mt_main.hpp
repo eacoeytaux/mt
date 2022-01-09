@@ -5,9 +5,9 @@
 
 namespace mt {
 
-/// @class MTROGUE
+/// @class MTAPP
 /// @brief actual game application
-class MTROGUE {
+class MTAPP {
 public:
     /// @brief run game
     static void run();
@@ -35,7 +35,11 @@ public:
 /// \n
 /// space - jump
 /// \n
-/// click - fire grappling hook (and hold)
+/// click + shift - fire grappling hook (and hold)
+/// \n
+/// click - fire arrow
+/// \n
+/// P - pause
 /// @subsection Debug
 /// G - toggle god mode (WASD to move)
 /// \n
@@ -47,9 +51,12 @@ public:
 /// \n
 /// > - zoom in
 /// @section install_sec Installation
-/// install OpenGL and GLUT
+/// @subsection Mac OSX
+/// OpenGL and GLUT come installed
 /// \n
-/// TODO...
+/// go to Project -> Build Phases -> Link Binary With Library and add OpenGL and GLUT
+/// @subsection Windows 10
+/// just give up...
 
 }
 

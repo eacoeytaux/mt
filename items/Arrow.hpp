@@ -5,7 +5,7 @@
 #include "Object.hpp"
 
 namespace mt {
-namespace util {
+namespace exst {
 
 /// @class Arrow
 /// @brief projectile weapon fired by a bow
@@ -14,11 +14,12 @@ public:
     virtual ~Arrow() { }
     Arrow(World*, const Coordinate & tip, const Vector & launch_speed);
     
-    void update() override;
+    void update(float dt = 1) override;
     void draw(const Camera *) const override;
     
 private:
-    
+    Color m_feather_color;
+
 };
 
 }

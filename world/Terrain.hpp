@@ -12,12 +12,12 @@ namespace exst {
 
 class Terrain : public Object {
 public:
-    Terrain(World*);
+    Terrain(World *);
     
     const varray<shared_ptr<TerrainVertex>> & vertices() const;
     const varray<shared_ptr<TerrainEdge>> & edges() const;
     
-    void update();
+    void update(float dt = 1);
     void draw(const Camera *) const;
     
 private:

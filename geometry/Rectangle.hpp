@@ -18,17 +18,15 @@ public:
     Rectangle(const Coordinate & c1, const Coordinate & c2 = Coordinate(), const Angle & rotation = Angle());
     
     Coordinate center() const;
-    void center(const Coordinate & center);
+    Rectangle & center(const Coordinate & center);
     float width() const;
-    void width(float);
+    Rectangle & width(float);
     float height() const;
-    void height(float);
+    Rectangle & height(float);
     Angle rotation() const;
-    void rotate_to(const Angle &);
-    void rotate(const Angle &);
     
-    void move(const Vector & vector);
-    void rotate_around_origin(const Angle &, const Coordinate & origin);
+    Shape & move(const Vector & vector) override;
+    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
     
     Coordinate top_right() const;
     Coordinate top_left() const;
@@ -43,7 +41,8 @@ public:
     float upper_bound_x() const;
     float upper_bound_y() const;
     float diagonal_length() const;
-    float area() const;
+    float area() const override;
+    int sides() const override;
     
     bool contains(const Coordinate &) const;
     bool intersects(const Line &) const;
@@ -51,9 +50,9 @@ public:
     bool intersects(const Rectangle &) const;
     bool intersects(const Circle &) const;
     
-    varray<Coordinate> coordinates() const;
-    varray<Line> lines() const;
-    varray<Triangle> triangles() const;
+    varray<Coordinate> coordinates() const override;
+    varray<Line> lines() const override;
+    varray<Triangle> triangles() const override;
     
     bool operator==(const Rectangle &) const;
     bool operator!=(const Rectangle &) const;

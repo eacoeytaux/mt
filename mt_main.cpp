@@ -26,6 +26,10 @@ GLsizei height = 600;
 const int FPS = 60;
 uint8_t timer_wait = 1000 / FPS;
 
+const bool ANTI_ALIAS = true;
+
+bool paused = false;
+float speed = 1;
 World world;
 
 void timer(int _t) {
@@ -34,7 +38,7 @@ void timer(int _t) {
 #ifdef MT_DEBUG
 //    cout << "loop " << loop << endl;
 #endif
-    world.update();
+    if (!paused) world.update(speed);
     glutPostRedisplay();
     glutTimerFunc(timer_wait, timer, 0);
 }
@@ -94,7 +98,7 @@ void keyboard_down(unsigned char _key, int _x, int _y) {
             break;
         case 27: // esc
             glutDestroyWindow(window_handle);
-            MTROGUE::shutdown();
+            MTAPP::shutdown();
             break;
         default:
         break;
@@ -125,6 +129,10 @@ void keyboard_up(unsigned char _key, int _x, int _y) {
         case 'D':
             world.player()->moving_right(false);
             break;
+        case 'p':
+        case 'P':
+            paused = !paused;
+            break;
 #ifdef MT_DEBUG
         case '?':
             Debug::on = !Debug::on;
@@ -147,6 +155,12 @@ void keyboard_up(unsigned char _key, int _x, int _y) {
 }
 
 void mouse_click(int _button, int _state, int _x, int _y) {
+    int modifiers;
+    int shift;
+    
+    modifiers = glutGetModifiers();
+    shift = modifiers & GLUT_ACTIVE_SHIFT;
+    
     switch (_button) {
         // treat all as same
         case GLUT_LEFT_BUTTON:
@@ -156,13 +170,17 @@ void mouse_click(int _button, int _state, int _x, int _y) {
                 Logger::print(INFO_LOG, "mouse click ..... ( %i : %i )", _x, _y);
                 cout << "mouse click ..... ( " << _x << " : " << _y << " )" << endl;
                 
-                world.player()->fire_hook();
+                if (shift || (_button == GLUT_RIGHT_BUTTON)) {
+                    world.player()->fire_hook();
+                } else {
+                    world.player()->fire_arrow();
+                }
             }
             else if (_state == GLUT_UP) {
                 Logger::print(INFO_LOG, "mouse release ... ( %i : %i )", _x, _y);
                 cout << "mouse release ... ( " << _x << " : " << _y << " )" << endl;
                 
-                world.player()->retract_hook();
+                world.player()->release_bow();
             }
         default:
         break;
@@ -173,19 +191,35 @@ void mouse_move(int _x, int _y) {
     world.mouse_movement(Coordinate((float)_x, (float)_y));
 }
 
-void MTROGUE::run() {
+void MTAPP::run() {
     Logger::start();
     Random::seed();
-//    Random::seed((unsigned int)Time().total_ms());
+//    Random::seed((unsigned int)SysTime::total_ms());
     
     world.camera_width(width);
     world.camera_height(height);
     
     int argc = 0; char * argv[] = { 0 };
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+    
+    if (ANTI_ALIAS) glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
+    else glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+    
     glutInitWindowSize(width, height);
-    window_handle = glutCreateWindow("Mt.Rogue");
+    window_handle = glutCreateWindow("mt");
+    
+    if (ANTI_ALIAS) {
+        glEnable(GL_MULTISAMPLE);
+        glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
+        
+        glEnable(GL_POINT_SMOOTH);
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_POLYGON_SMOOTH);
+        
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    }
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -203,7 +237,7 @@ void MTROGUE::run() {
     glutMainLoop();
 }
     
-void MTROGUE::shutdown(int _exitcode) {
+void MTAPP::shutdown(int _exitcode) {
     Logger::close();
     exit(_exitcode);
 }

@@ -17,7 +17,7 @@ Camera::Camera(const Coordinate & _center, float _width, float _height, float _z
     m_zoom = _zoom;
 }
 
-void Camera::update() {
+void Camera::update(float dt) {
     float zoom_delta = (m_zoom_target - m_zoom) * m_movement_ratio;
     m_zoom += zoom_delta;
     m_center += Vector(m_center, (Vector(m_target) * m_zoom).destination()) * m_movement_ratio;
@@ -71,12 +71,12 @@ void Camera::draw_rectangle(const Color & _color, const Rectangle & _rectangle, 
 }
 
 void Camera::draw_rectangle(const Colors & _colors, const Rectangle & _rectangle, const unsigned int _thickness, float _z) const {
-    unsigned int thickness = _thickness * m_zoom;
+    unsigned int thickness = _thickness * (m_zoom * _z);
     if (_thickness) thickness = max<int>(thickness, 1);
     Rectangle rectangle = _rectangle;
-    rectangle.center(Coordinate(rectangle.center().x() * m_zoom, rectangle.center().y() * m_zoom));
-    rectangle.width(rectangle.width() * m_zoom);
-    rectangle.height(rectangle.height() * m_zoom);
+    rectangle.center(Coordinate(rectangle.center().x() * (m_zoom * _z), rectangle.center().y() * (m_zoom * _z)));
+    rectangle.width(rectangle.width() - ((rectangle.width() - (rectangle.width() * m_zoom)) * _z));
+    rectangle.height(rectangle.height() - ((rectangle.height() - (rectangle.height() * m_zoom)) * _z));
     rectangle.move(Vector(width() / 2, height() / 2) - (Vector(m_center) * _z));
     SysGraphics::draw_rectangle(_colors, rectangle, thickness);
 }

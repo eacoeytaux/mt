@@ -31,7 +31,7 @@ void Tree::draw(const Camera * _camera) const {
         Vector sub_trunk(Vector(top, top + Vector((sway_angle * (i + 2)) + (PI / 2), 100.0 * shink_ratio)));
         // base leaves triangle
         Polygon leaves = Polygon(varray<Vector>({ Coordinate(0, 0), Coordinate(-LEAVES_HEIGHT_BASE_LENGTH * shink_ratio / 2, -LEAVES_HEIGHT_BASE_LENGTH * shink_ratio), Coordinate(LEAVES_HEIGHT_BASE_LENGTH * shink_ratio / 2, -LEAVES_HEIGHT_BASE_LENGTH * shink_ratio) }), sub_trunk.destination());
-        leaves.rotate_around_origin(sway_angle * (i + 2), leaves.coordinates()[0]);
+        leaves.rotate_about(sway_angle * (i + 2), leaves.coordinates()[0]);
         _camera->draw_polygon(LEAVES_COLOR, leaves);
         
         top = sub_trunk.destination();

@@ -41,7 +41,7 @@ Fire::Fire(World* _world, const Coordinate & _center) : Object(_world, _center) 
     flame_timer.reset(FLAME_WAIT);
 }
 
-void Fire::update() {
+void Fire::update(float dt) {
     m_world->add_light_source(position() + Vector(0, METER), LIGHT_DISTANCE);
     
     Random::seed();

@@ -12,12 +12,12 @@ class Player : public Mob {
 public:
     Player(World*, const Coordinate & center);
     
-    void update();
-    void draw(const Camera *) const;
+    void update(float dt = 1) override;
+    void draw(const Camera *) const override;
     void draw_reticle(const Camera *) const;
     
-    void kill();
-    void hurt(int health);
+    void kill() override;
+    void hurt(int health) override;
     
     void moving_right(bool);
     void moving_left(bool);
@@ -28,11 +28,20 @@ public:
     
     void aim(const Angle &);
     void fire_hook();
-    void retract_hook();
+    void fire_arrow();
+    void release_bow();
     
 private:
-    void update_velocity();
-    void move();
+    void adjust_velocity(float dt) override;
+    void move(float dt) override;
+    
+    void draw_head(const Camera *) const;
+    void draw_body(const Camera *) const;
+    void draw_front_arm(const Camera *) const;
+    void draw_front_leg(const Camera *) const;
+    void draw_back_arm(const Camera *) const;
+    void draw_back_leg(const Camera *) const;
+    void draw_accessories(const Camera *) const;
     
     bool m_moving_right = false;
     bool m_moving_left = false;
@@ -47,13 +56,15 @@ private:
     
     bool m_aiming = true;
     Angle m_aim_angle = 0;
-    
     bool m_firing_hook = false;
+    bool m_firing_arrow = false;
     
     Rope m_rope;
     float m_rope_max_length;
     float m_hook_growth_speed;
     float m_hook_retract_speed;
+    
+    Timer m_reload_timer;
     
 #ifdef MT_DEBUG
 public:

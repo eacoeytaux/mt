@@ -13,7 +13,7 @@ class Mob : public Object {
 public:
     Mob(World * world, const Coordinate & center, const float width, const float height);
     
-    virtual void update();
+    virtual void update(float dt = 1);
     virtual void draw(const Camera *) const;
     
     /// @return whether mob is alive
@@ -37,6 +37,12 @@ public:
     virtual int max_health() const;
     /// @param health new maximum health
     virtual void max_health(int health); // will decrease health if necessary
+    
+protected:
+    /// @brief make any altercations to velocity
+    virtual void adjust_velocity(float dt);
+    /// @brief move object thro dugh world
+    virtual void move(float dt);
     
 private:
     bool m_alive = true;

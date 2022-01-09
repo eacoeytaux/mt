@@ -8,7 +8,7 @@ LightSource::LightSource(const Coordinate & _position, const float _distance, co
     position = _position;
     distance = _distance;
     flicker = _flicker;
-    tint = Color(GREEN, 64);
+    tint = Color(WHITE, 64); //CLEAR;
 }
 
 LightSource::LightSource(const Coordinate & _position, const float _distance, const Color & _tint, const float _flicker) {
@@ -16,7 +16,6 @@ LightSource::LightSource(const Coordinate & _position, const float _distance, co
     distance = _distance;
     flicker = _flicker;
     tint = _tint;
-    tint = Color(GREEN, 64); // TODO delete
 }
 
 bool LightSource::operator==(const LightSource & _light_source) const {
@@ -46,12 +45,11 @@ void Darkness::clear_light_sources() {
 void Darkness::draw(const Camera * _camera) const {
     if (!m_darkness_slider.value()) return;
     
-    Random::seed(0); // TODO
     Rectangle full(_camera->width(), _camera->height(), _camera->center());
     draw_recursive(_camera, full, m_light_sources, { });
     
     for_each (light, m_light_sources) {
-        _camera->draw_circle(Color(WHITE, 64), Circle(light.distance, light.position));
+        _camera->draw_circle(light.tint, Circle(light.distance, light.position));
     }
 }
 
@@ -78,7 +76,7 @@ void Darkness::fill_boundary_edge(const Camera * _camera, const Rectangle & _bou
 //    _camera->draw_lines(CYAN, arc);
     
     _camera->draw_line(Color(WHITE, 127), Line(v1.destination(), v2.destination()));
-    _camera->draw_rectangle(_source.tint, _boundary);
+//    _camera->draw_rectangle(_source.tint, _boundary);
 //    _camera->draw_rectangle(RED, _boundary, 2);
 }
 

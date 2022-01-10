@@ -69,6 +69,8 @@ void Cloud::update(float dt) {
 }
 
 void Cloud::draw(const Camera * _camera) const {
+    Object::draw(_camera);
+    
     for_each (puff, m_puffs) {
         _camera->draw_circle(WHITE, Circle(puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
 //        _camera->draw_rectangle(WHITE, Rectangle(puff.m_radius, puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
@@ -77,6 +79,4 @@ void Cloud::draw(const Camera * _camera) const {
         _camera->draw_circle(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, m_z);
 //        _camera->draw_rectangle(INSIDE_COLOR, Rectangle(puff.m_radius * PUFF_OUTLINE_RATIO, puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, m_z);
     }
-    
-    Object::draw(_camera);
 }

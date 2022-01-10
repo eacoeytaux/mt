@@ -12,6 +12,7 @@ const Color GRASS_COLOR_DARK = Color(0, 127, 0);
 
 Terrain::Terrain(World * world) : Object(world, Coordinate(), 0, 0, 1) {
     layer_position(1);
+    m_casts_shadow = false;
     m_gravity_ratio = 0;
     
     shared_ptr<TerrainVertex> v0(new TerrainVertex(Coordinate(-800, 0)));

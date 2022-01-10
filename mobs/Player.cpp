@@ -26,20 +26,33 @@ const int RELOAD_TIME = 5;
 
 // graphics
 static float BOW_ORIGIN_OFFSET_Y = METER / 4;
-static float JACKET_HEAD_OPENING = 0.64;
-static float HEAD_RADIUS = METER / 2;
+static float JACKET_HEAD_OPENING = 0.6;
+static float HEAD_RADIUS = METER / 3;
 static float NECK_LENGTH = METER / 16;
 static float BODY_WIDTH = METER / 1.5;
 static float BODY_HEIGHT = METER * 0.8;
 static float LEG_WIDTH = METER / 4;
 static float LEG_LENGTH = METER / 2;
 static float ARM_WIDTH = METER / 5;
-const Color FACE_COLOR = Color(255, 224, 189);
+
+static int BLINK_DURATION = 7;
+static int MIN_BLINK_GAP = 240;
+static int MAX_BLINK_GAP = 300;
+
+const Color SKIN_COLOR = Color(255, 224, 189);
+//const Color SKIN_COLOR = Color(124, 80, 26);
+const Color HAIR_COLOR = Color(200, 36, 36);
 const Color EYE_COLOR = BLACK;
-const Color FRONT_COLOR = Color(255, 190, 0);
-const Color MID_COLOR = Color(255, 165, 0);
-const Color BACK_COLOR = Color(255, 130, 0);
+
+const Color HAT_COLOR = YELLOW;
+const Color JACKET_COLOR = Color(139, 69, 19); //Color(255, 190, 0);
+const Color JACKET_FRONT_COLOR = JACKET_COLOR; //Color(255, 165, 0);
+const Color JACKET_BACK_COLOR = JACKET_COLOR; //Color(255, 130, 0);
+const Color UNDERSHIRT_COLOR = WHITE;
+const Color PANTS_COLOR = Color(205, 133, 63);
 const Color BOOT_COLOR = BLACK;
+const Color SOLE_COLOR = GRAY_MID;
+const Color LACE_COLOR = WHITE;
 
 const float HANDLE_LENGTH = 12;
 const Color CROSSBOW_COLOR = Color(164, 72, 32);
@@ -148,13 +161,22 @@ void Player::update(float dt) {
     
     if (m_firing_arrow) {
         if (!m_reload_timer.remaining()) {
-            m_world->add_object(shared_ptr<Object>(new Arrow(m_world, position(), Vector(m_aim_angle /* + ((Random::r_Angle() / 16) - PI / 16) */, 32) + velocity())));
+            m_world->add_object(shared_ptr<Object>(new Arrow(m_world, position() + Vector(m_aim_angle, 32), Vector(m_aim_angle /* + ((Random::r_Angle() / 16) - PI / 16) */, 32) + velocity())));
             m_reload_timer.reset(RELOAD_TIME);
         }
     }
 }
 
 void Player::draw(const Camera * _camera) const {
+#ifdef MT_DEBUG
+    if (god_mode) {
+        static Color glow = Color(WHITE, 32);
+        _camera->draw_circle(glow, Circle(METER * 2, position()));
+        _camera->draw_circle(glow, Circle(METER * 1.7, position()));
+        _camera->draw_circle(glow, Circle(METER * 1.3, position()));
+    }
+#endif
+    
     // draw hook
     m_rope.draw(_camera);
     
@@ -192,97 +214,167 @@ void Player::draw(const Camera * _camera) const {
 void Player::draw_head(const Camera * _camera) const {
     Coordinate head_center = position() + Vector(0, (BODY_HEIGHT / 2) - BOW_ORIGIN_OFFSET_Y + HEAD_RADIUS - NECK_LENGTH);
     Coordinate face_center = head_center + Vector(m_aim_angle, HEAD_RADIUS * ((1 - JACKET_HEAD_OPENING) / 2));
-    _camera->draw_circle(MID_COLOR, Circle(HEAD_RADIUS, head_center));
-    _camera->draw_circle(FACE_COLOR, Circle(HEAD_RADIUS * JACKET_HEAD_OPENING, face_center));
-    _camera->draw_circle(WHITE, Circle(HEAD_RADIUS * JACKET_HEAD_OPENING, face_center), 8);
+    
+//    _camera->draw_circle(HAT_COLOR, Circle(HEAD_RADIUS * 1.1, head_center - Vector(m_aim_angle, HEAD_RADIUS * 0.2) + Vector(m_aim_angle + (PI / 2), 4)));
+    
+    _camera->draw_circle(HAIR_COLOR, Circle(HEAD_RADIUS, head_center));
+    _camera->draw_circle(SKIN_COLOR, Circle(HEAD_RADIUS * JACKET_HEAD_OPENING, face_center));
+    
+    // ears
+    // _camera->draw_circle(SKIN_COLOR, Circle(2, face_center + Vector(9, 0)));
+    // _camera->draw_circle(SKIN_COLOR, Circle(2, face_center + Vector(-9, 0)));
+    
+    // _camera->draw_circle(WHITE, Circle(HEAD_RADIUS * JACKET_HEAD_OPENING, face_center), 8);
     // _camera->draw_rectangle(WHITE, Rectangle(5, 4, face_center + Vector(5, 0)));
     // _camera->draw_rectangle(WHITE, Rectangle(5, 4, face_center + Vector(-5, 0)));
-    _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 3, face_center + Vector(5, 0)));
-    _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 3, face_center + Vector(-5, 0)));
+    
+    m_blink_counter.tick();
+    if (m_blink_counter.remaining() < BLINK_DURATION) {
+        if (!m_blink_counter.remaining()) m_blink_counter.reset(Random::r_int(MIN_BLINK_GAP, MAX_BLINK_GAP));
+        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 1, face_center + Vector(5, -1)));
+        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 1, face_center + Vector(-5, -1)));
+    } else {
+        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 3, face_center + Vector(5, 0)));
+        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 3, face_center + Vector(-5, 0)));
+    }
+    
+    _camera->draw_rectangle(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(0, -8)));
+    _camera->draw_rectangle(HAIR_COLOR, Rectangle(20, 12, face_center + Vector(0, -12)));
+//    _camera->draw_rectangle(HAIR_COLOR, Rectangle(6, 12, face_center + Vector(-12, -5)));
+//    _camera->draw_rectangle(HAIR_COLOR, Rectangle(5, 12, face_center + Vector(11, -5)));
+    
+//    _camera->draw_rectangle(HAIR_COLOR, Rectangle(12, 12, face_center + Vector(0, 10), (PI / 4)));
+//    _camera->draw_rectangle(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(6, 10), (PI / 4)));
+//    _camera->draw_rectangle(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(-6, 10), (PI / 4)));
+    
+    Polygon hat = Polygon(varray<Coordinate>({ Coordinate(HEAD_RADIUS * 0.75, HEAD_RADIUS * 1.2), Coordinate(-HEAD_RADIUS * 0.75, HEAD_RADIUS * 1.2), Coordinate(-HEAD_RADIUS, HEAD_RADIUS / 2), Coordinate(HEAD_RADIUS, HEAD_RADIUS / 2) }));
+    Line brim = Line(face_center + Coordinate(-HEAD_RADIUS * 1.25, HEAD_RADIUS / 2), face_center + Coordinate(HEAD_RADIUS * 1.25, HEAD_RADIUS / 2));
+    hat.move(face_center);
+//    _camera->draw_polygon(HAT_COLOR, hat);
+//    _camera->draw_line(HAT_COLOR, brim, 4);
 }
 
 void Player::draw_body(const Camera * _camera) const {
-    _camera->draw_rectangle(MID_COLOR, Rectangle(BODY_WIDTH, BODY_HEIGHT, position() + Vector(0, -BOW_ORIGIN_OFFSET_Y)));
+    //    _camera->draw_rectangle(MID_COLOR, Rectangle(BODY_WIDTH, BODY_HEIGHT, position() + Vector(0, -BOW_ORIGIN_OFFSET_Y)));
+    
+    // pants base
+    _camera->draw_rectangle(PANTS_COLOR, Rectangle(BODY_WIDTH - 4, BODY_HEIGHT * (1.0/3.0), position() + Vector(0, -BOW_ORIGIN_OFFSET_Y + (-BODY_HEIGHT * (1.0/4.0)))));
+    
+    _camera->draw_line(BLACK, Line(position() + Vector((BODY_WIDTH - 2) / 2, -BOW_ORIGIN_OFFSET_Y - (BODY_HEIGHT * (1.0/4.0)) + 3), position() + Vector(-(BODY_WIDTH - 2) / 2, -BOW_ORIGIN_OFFSET_Y - (BODY_HEIGHT * (1.0/4.0)) + 3)), 4);
+    
+    // undershirt
+    _camera->draw_rectangle(WHITE, Rectangle(BODY_WIDTH * 0.5, BODY_HEIGHT * (2.0/3.0), position() + Vector(0, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
+    
+    // jacket
+    _camera->draw_rectangle(JACKET_COLOR, Rectangle(BODY_WIDTH / 3, BODY_HEIGHT * (2.0/3.0), position() + Vector(BODY_WIDTH / 3, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
+    _camera->draw_rectangle(JACKET_COLOR, Rectangle(BODY_WIDTH / 3, BODY_HEIGHT * (2.0/3.0), position() + Vector(-BODY_WIDTH / 3.5, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
 }
 
 void Player::draw_front_arm(const Camera * _camera) const {
-    Coordinate shoulder_joint_left = position() + Vector(-(BODY_WIDTH / 2), (BODY_HEIGHT / 2) - BOW_ORIGIN_OFFSET_Y);
-    Line left_arm = Line(shoulder_joint_left, position() + Vector(m_aim_angle - (PI / 4), HANDLE_LENGTH));
-    _camera->draw_line(FRONT_COLOR, left_arm, ARM_WIDTH);
+    Coordinate shoulder_joint_left = position() + Vector(-(BODY_WIDTH / 2) + 4, (BODY_HEIGHT / 2) - BOW_ORIGIN_OFFSET_Y);
+    Coordinate hand_left = position() + Vector(m_aim_angle - (PI / 4), HANDLE_LENGTH);
+    
+    _camera->draw_circle(SKIN_COLOR, Circle(ARM_WIDTH / 2, hand_left));
+    
+//    Line left_arm = Line(shoulder_joint_left, hand_left);
+//    _camera->draw_line(JACKET_FRONT_COLOR, left_arm, ARM_WIDTH);
+    
+    Joint arm = Joint(shoulder_joint_left, 15, 14, hand_left);
+    _camera->draw_line(JACKET_FRONT_COLOR, Line(arm.c1(), arm.joint()), ARM_WIDTH);
+    _camera->draw_circle(JACKET_FRONT_COLOR, Circle(ARM_WIDTH / 2, arm.joint()));
+    _camera->draw_line(JACKET_FRONT_COLOR, Line(arm.joint(), arm.c2()), ARM_WIDTH);
 }
 
-void Player::draw_front_leg(const Camera * _camera) const {Coordinate hip_joint_left = position() + Vector(-(BODY_WIDTH / 2) + (LEG_WIDTH / 2), -(BODY_HEIGHT / 2));
-    Coordinate foot_joint_left = position() + Vector(-(BODY_WIDTH / 2) + (LEG_WIDTH / 2), -(BODY_HEIGHT / 2) - LEG_LENGTH);
+void Player::draw_front_leg(const Camera * _camera) const {
+    Coordinate hip_joint_left = position() + Vector(-(BODY_WIDTH / 2) + (LEG_WIDTH / 2) + 3, -(BODY_HEIGHT / 2));
+    Coordinate foot_joint_left = position() + Vector(-(BODY_WIDTH / 2) + (LEG_WIDTH / 2) + 3, -(BODY_HEIGHT / 2) - LEG_LENGTH);
     
     if (m_ground && (m_moving_left ^ m_moving_right)) {
-        if (m_moving_left) foot_joint_left += Vector((float)((m_world->age() + 8) % 16) - 8.0, 0);
-        else if (m_moving_right) foot_joint_left -= Vector((float)((m_world->age() + 8) % 16) - 8.0, 0);
+        if (m_moving_left) foot_joint_left += Vector((float)((m_world->age() + 8) % 16) - 8, 0);
+        else if (m_moving_right) foot_joint_left -= Vector((float)((m_world->age() + 8) % 16) - 8, 0);
     }
     
     Line left_leg = Line(hip_joint_left, foot_joint_left);
     
     Rectangle left_boot_base = Rectangle(LEG_WIDTH + 7, 5, foot_joint_left + Vector(1.5, 0));
-    Rectangle left_boot_shin = Rectangle(LEG_WIDTH + 4, 8, foot_joint_left + Vector(0, 1.5));
+    Rectangle left_boot_shin = Rectangle(LEG_WIDTH + 4, 9, foot_joint_left + Vector(0, 2));
+    Rectangle left_boot_sole = Rectangle(LEG_WIDTH + 5, 2, foot_joint_left + Vector(1.5, -3));
     Line lace_1 = Line(foot_joint_left + Vector(5, 5), foot_joint_left + Vector(-3, 5));
     Line lace_2 = Line(foot_joint_left + Vector(5, 3), foot_joint_left + Vector(-3, 3));
     
-    _camera->draw_line(FRONT_COLOR, left_leg, LEG_WIDTH);
+    _camera->draw_line(PANTS_COLOR, left_leg, LEG_WIDTH);
     _camera->draw_rectangle(BOOT_COLOR, left_boot_shin);
-    _camera->draw_line(WHITE, lace_1, 1);
-    _camera->draw_line(WHITE, lace_2, 1);
+    _camera->draw_line(LACE_COLOR, lace_1, 1);
+    _camera->draw_line(LACE_COLOR, lace_2, 1);
+    _camera->draw_rectangle(SOLE_COLOR, left_boot_sole);
     _camera->draw_rectangle(BOOT_COLOR, left_boot_base);
 }
 
 void Player::draw_back_arm(const Camera * _camera) const {
-    Coordinate shoulder_joint_right = position() + Vector((BODY_WIDTH / 2) - (ARM_WIDTH / 2), (BODY_HEIGHT / 2) - (ARM_WIDTH / 2) - BOW_ORIGIN_OFFSET_Y);
-    Line right_arm = Line(shoulder_joint_right, position() + Vector(m_aim_angle, 40));
+    Coordinate shoulder_joint_right = position() + Vector((BODY_WIDTH / 2) - (ARM_WIDTH / 2) - 4, (BODY_HEIGHT / 2) - (ARM_WIDTH / 2) - BOW_ORIGIN_OFFSET_Y);
+    Coordinate hand_right = position() + Vector(m_aim_angle - (PI / 8), 24);
     
-    _camera->draw_line(BACK_COLOR, right_arm, ARM_WIDTH);
+    Line right_arm = Line(shoulder_joint_right, hand_right);
+    _camera->draw_line(JACKET_BACK_COLOR, right_arm, ARM_WIDTH);
+//    _camera->draw_line(JACKET_BACK_COLOR, right_arm, ARM_WIDTH);
+    
+//    Joint arm = Joint(shoulder_joint_right, 24, 24, hand_right);
+//    _camera->draw_line(JACKET_BACK_COLOR, Line(arm.c1(), arm.joint()), ARM_WIDTH);
+//    _camera->draw_circle(JACKET_BACK_COLOR, Circle(ARM_WIDTH / 2, arm.joint()));
+//    _camera->draw_line(JACKET_BACK_COLOR, Line(arm.joint(), arm.c2()), ARM_WIDTH);
+    
+    _camera->draw_circle(SKIN_COLOR, Circle(ARM_WIDTH / 2, hand_right));
 }
 
 void Player::draw_back_leg(const Camera * _camera) const {
-    Coordinate hip_joint_right = position() + Vector((BODY_WIDTH / 2) - (LEG_WIDTH / 2), -(BODY_HEIGHT / 2));
-    Coordinate foot_joint_right = position() + Vector((BODY_WIDTH / 2) - (LEG_WIDTH / 2), -(BODY_HEIGHT / 2) - LEG_LENGTH);
+    Coordinate hip_joint_right = position() + Vector((BODY_WIDTH / 2) - (LEG_WIDTH / 2) - 3, -(BODY_HEIGHT / 2));
+    Coordinate foot_joint_right = position() + Vector((BODY_WIDTH / 2) - (LEG_WIDTH / 2) - 3, -(BODY_HEIGHT / 2) - LEG_LENGTH);
     
     if (m_ground && (m_moving_left ^ m_moving_right)) {
-        if (m_moving_left) foot_joint_right += Vector((float)(m_world->age() % 16) - 8.0, 0);
-        else if (m_moving_right) foot_joint_right -= Vector((float)(m_world->age() % 16) - 8.0, 0);
+        if (m_moving_left) foot_joint_right += Vector((float)(m_world->age() % 16) - 8, 0);
+        else if (m_moving_right) foot_joint_right -= Vector((float)(m_world->age() % 16) - 8, 0);
     }
     
     Line right_leg = Line(hip_joint_right, foot_joint_right);
     Rectangle right_boot_base = Rectangle(LEG_WIDTH + 7, 5, foot_joint_right + Vector(1.5, 0));
-    Rectangle right_boot_shin = Rectangle(LEG_WIDTH + 4, 8, foot_joint_right + Vector(0, 1.5));
+    Rectangle right_boot_shin = Rectangle(LEG_WIDTH + 4, 9, foot_joint_right + Vector(0, 2));
+    Rectangle right_boot_sole = Rectangle(LEG_WIDTH + 5, 2, foot_joint_right + Vector(1.5, -3));
     Line lace_1 = Line(foot_joint_right + Vector(5, 5), foot_joint_right + Vector(-3, 5));
     Line lace_2 = Line(foot_joint_right + Vector(5, 3), foot_joint_right + Vector(-3, 3));
     
-    _camera->draw_line(BACK_COLOR, right_leg, LEG_WIDTH);
+    _camera->draw_line(PANTS_COLOR, right_leg, LEG_WIDTH);
     _camera->draw_rectangle(BOOT_COLOR, right_boot_shin);
-    _camera->draw_line(WHITE, lace_1, 1);
-    _camera->draw_line(WHITE, lace_2, 1);
+    _camera->draw_line(LACE_COLOR, lace_1, 1);
+    _camera->draw_line(LACE_COLOR, lace_2, 1);
+    _camera->draw_rectangle(SOLE_COLOR, right_boot_sole);
     _camera->draw_rectangle(BOOT_COLOR, right_boot_base);
 }
 
 void Player::draw_accessories(const Camera * _camera) const {
     // draw ice pick
-     static IcePick icepick(m_world, position());
-     icepick.position(position());
-     icepick.draw(_camera);
+//     static IcePick icepick(m_world, position());
+//     icepick.position(position());
+//     icepick.draw(_camera);
     
     // draw crossbow
     static bool set = false;
     static Polygon crossbow_static;
     if (!set) {
-        float scale = 6;
-        crossbow_static = Polygon({ Coordinate(8 * scale, 0 * scale), Coordinate(0 * scale, 0 * scale), Coordinate(-2 * scale, -2 * scale), Coordinate(-4 * scale, -2 * scale), Coordinate(-4 * scale, -4 * scale), Coordinate(1 * scale, -1 * scale), Coordinate(7 * scale, -1 * scale) });
+        float scale = 5;
+        crossbow_static = Polygon({ Coordinate(6 * scale, 0 * scale), Coordinate(0 * scale, 0 * scale), Coordinate(-2 * scale, -2 * scale), Coordinate(-4 * scale, -2 * scale), Coordinate(-4 * scale, -4 * scale), Coordinate(1 * scale, -1 * scale), Coordinate(5 * scale, -1 * scale) });
         set = true;
     }
     Polygon crossbow = crossbow_static;
     crossbow.move(position());
     crossbow.rotate_about(m_aim_angle, position());
-    Line crossbow_handle = Line(position() + Vector(4, 0), position() + Vector(2, -HANDLE_LENGTH));
+    Line crossbow_handle = Line(position() + Vector(22, 0), position() + Vector(22, -HANDLE_LENGTH));
     crossbow_handle.rotate_around_origin(m_aim_angle, position());
     _camera->draw_polygon(CROSSBOW_COLOR, crossbow);
     _camera->draw_line(CROSSBOW_COLOR, crossbow_handle, 4);
+    
+    static Color feather_color = MAGENTA; //Random::r_Color();
+    Arrow arrow = Arrow(m_world, position() + Vector(m_aim_angle, 32), Vector(m_aim_angle, 1), feather_color);
+    arrow.draw(_camera);
 }
 
 void Player::draw_reticle(const Camera * _camera) const {

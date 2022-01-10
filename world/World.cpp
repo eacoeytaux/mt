@@ -12,7 +12,10 @@ using mt::exst::World;
 /// @brief how many updates world will run before it is shown
 const int START_AGE = 512;
 /// @brief how much the camera zooms in/out
-const float CAMERA_ZOOM_RATIO = 0.9;
+const float CAMERA_ZOOM_RATIO = 0.95;
+
+const float RETICLE_WIDTH = 1;
+const float RETICLE_LENGTH = 9;
 
 World::World() :
 m_sky(this),
@@ -54,6 +57,8 @@ void World::reset() {
 void World::update(float dt) {
     ++m_age;
     
+    m_camera.update(dt);
+    
     // sort object list
     struct object_less_than {
         // sort in order of z (includes layers), then x, then y
@@ -80,30 +85,51 @@ void World::update(float dt) {
     for_each (object, m_object_queue) m_objects.push_back(object);
     m_object_queue.clear();
     
-    m_camera.update(dt);
-     
+    Coordinate camera_center_pre = m_camera.center();
+    
+    Coordinate camera_center_post = m_camera.center();
+    Vector d_camera_center = camera_center_post - camera_center_pre;
+    m_mouse_position += d_camera_center;
 }
 
 void World::draw() const {
     const Camera * camera = &m_camera;
     m_sky.draw(camera);
-//    m_terrain->draw(camera);
+    // m_terrain->draw(camera);
     for_each (object, m_objects) object->draw(camera);
     m_darkness->draw(camera);
-    m_player->draw_reticle(camera); // draw reticle above everything else
 #ifdef MT_DEBUG
     if (Debug::on) {
         float BARRIER_THICKNESS = 4 / m_camera.zoom();
         m_camera.draw_rectangle(RED, Rectangle(2 * (m_camera.width() + (BARRIER_THICKNESS / 2)), 2 * (m_camera.height() + (BARRIER_THICKNESS / 2)), Coordinate(0, 0)), BARRIER_THICKNESS + 1, 0);
     }
 #endif
+    // reticle
+    m_camera.draw_rectangle(BLACK, Rectangle((RETICLE_LENGTH + 2) / m_camera.zoom(), (RETICLE_WIDTH + 2) / m_camera.zoom(), m_mouse_position), 0);
+    m_camera.draw_rectangle(BLACK, Rectangle((RETICLE_WIDTH + 2) / m_camera.zoom(), (RETICLE_LENGTH + 2) / m_camera.zoom(), m_mouse_position), 0);
+    m_camera.draw_rectangle(WHITE, Rectangle(RETICLE_WIDTH / m_camera.zoom(), RETICLE_LENGTH / m_camera.zoom(), m_mouse_position), 0);
+    m_camera.draw_rectangle(WHITE, Rectangle(RETICLE_LENGTH / m_camera.zoom(), RETICLE_WIDTH / m_camera.zoom(), m_mouse_position), 0);
+    
 }
 
 void World::mouse_movement(const Coordinate & screen_pos) {
-    Coordinate world_pos = screen_pos - (Vector(m_camera.width(), m_camera.height()) * m_camera.zoom() / 2) + m_camera.center();
-    Angle angle_from_player = Vector(m_player->position(), world_pos).angle();
-    angle_from_player *= -1;
+    Coordinate world_pos = m_camera.center() + screen_pos - ((Vector(m_camera.width(), m_camera.height()) / 2));
+    world_pos.y(((world_pos.y() - m_camera.center().y()) * -1) + m_camera.center().y());
+    Vector center_offset(m_camera.center(), world_pos);
+    center_offset /= m_camera.zoom();
+    world_pos = center_offset.destination();
+    m_mouse_position = world_pos;
+    
+    Angle angle_from_player = Vector(m_player->position(), m_mouse_position).angle();
     m_player->aim(angle_from_player);
+}
+
+Coordinate World::mouse_position() const {
+    return m_mouse_position;
+}
+
+void World::mouse_position(const Coordinate & _position) {
+    m_mouse_position = _position;
 }
 
 uint64_t World::age() const {

@@ -6,6 +6,10 @@
 NAMESPACES
 using mt::exst::Object;
 
+const float SHADOW_ALPHA = 64;
+const float SHADOW_WIDTH_SCALE = 0.36; // (0, 1]
+const float SHADOW_THICKNESS = 4;
+
 Object::Object(World* _world, const Coordinate & _position, const float _width, const float _height, const float _z, const Vector & _velocity) {
     m_world = _world;
     layer_position(1);
@@ -14,7 +18,7 @@ Object::Object(World* _world, const Coordinate & _position, const float _width, 
     z(_z);
     position(_position);
     velocity(_velocity);
-    m_casts_shadow = (_z == 1);
+    m_casts_shadow = true;
     m_terrarin_boundaries = true;
 }
 
@@ -136,13 +140,21 @@ void Object::draw(const Camera * _camera) const {
 }
 
 void Object::draw_shadow(const Camera * _camera) const {
-    // TODO
+    if (m_ground) {
+        Coordinate base = position() - Vector(0, height() / 2);
+        Line shadow = Line(base - Vector(m_ground->line().angle(), (width() / 2) * SHADOW_WIDTH_SCALE), base + Vector(m_ground->line().angle(), (width() / 2) * SHADOW_WIDTH_SCALE));
+//        _camera->draw_line(Color(BLACK, SHADOW_ALPHA), shadow, SHADOW_THICKNESS);
+        
+        // TODO split on vertex
+    }
+    
+    // TODO above ground
 }
 
 #ifdef MT_DEBUG
 void Object::draw_visable_box(const Camera * _camera) const {
     if (m_width && m_height) {
-        _camera->draw_polygon(Color(255, 255, 255, 64), visable_box(), 2 / _camera->zoom(), m_z);
+        _camera->draw_polygon(Color(BLACK, 64), visable_box(), 2 / _camera->zoom(), m_z);
     }
 }
 #endif

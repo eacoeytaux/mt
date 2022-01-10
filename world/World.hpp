@@ -53,6 +53,9 @@ public:
     
     void add_light_source(const Coordinate & position, const float distance, const float flicker = 0);
     
+    Coordinate mouse_position() const;
+    void mouse_position(const Coordinate & position);
+    
 protected:
     void clear_objects();
     
@@ -69,6 +72,8 @@ private:
     shared_ptr<BackgroundTerrain> m_background_terrain;
     Vector m_wind;
     Sky m_sky;
+    
+    Coordinate m_mouse_position;
 };
 
 }

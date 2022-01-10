@@ -24,12 +24,12 @@ public:
     virtual void draw(const Camera *) const;
     virtual void draw_shadow(const Camera *) const;
     
-    float width() const;
-    void width(const float);
-    float height() const;
-    void height(const float);
-    float z() const;
-    void z(const float);
+    virtual float width() const;
+    virtual void width(const float);
+    virtual float height() const;
+    virtual void height(const float);
+    virtual float z() const;
+    virtual void z(const float);
     
     float gravity_ratio() const;
     void gravity_ratio(float);

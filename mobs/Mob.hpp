@@ -44,6 +44,9 @@ protected:
     /// @brief move object thro dugh world
     virtual void move(float dt);
     
+protected:
+    mutable Timer m_blink_counter;
+    
 private:
     bool m_alive = true;
     Slider<int> m_health;

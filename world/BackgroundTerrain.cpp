@@ -10,6 +10,6 @@ void BackgroundTerrain::update(float _dt) {
 }
 
 void BackgroundTerrain::draw(const Camera * _camera) const {
-    _camera->draw_rectangle(GREEN, Rectangle(500, 500, Coordinate(0, 0)));
     Object::draw(_camera);
+    _camera->draw_rectangle(GREEN, Rectangle(500, 500, Coordinate(0, 0)));
 }

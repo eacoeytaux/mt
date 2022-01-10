@@ -5,8 +5,8 @@
 NAMESPACES
 using mt::graphics::Camera;
 
-const float MIN_ZOOM = 0.25;
-const float MAX_ZOOM = 4;
+const float MIN_ZOOM = 0.64;
+const float MAX_ZOOM = 2;
 
 Camera::Camera(const Coordinate & _center, float _width, float _height, float _zoom) {
     width(_width);
@@ -75,8 +75,8 @@ void Camera::draw_rectangle(const Colors & _colors, const Rectangle & _rectangle
     if (_thickness) thickness = max<int>(thickness, 1);
     Rectangle rectangle = _rectangle;
     rectangle.center(Coordinate(rectangle.center().x() * (m_zoom * _z), rectangle.center().y() * (m_zoom * _z)));
-    rectangle.width(rectangle.width() - ((rectangle.width() - (rectangle.width() * m_zoom)) * _z));
-    rectangle.height(rectangle.height() - ((rectangle.height() - (rectangle.height() * m_zoom)) * _z));
+    rectangle.width(ceil(rectangle.width() - ((rectangle.width() - (rectangle.width() * m_zoom)) * _z)));
+    rectangle.height(ceil(rectangle.height() - ((rectangle.height() - (rectangle.height() * m_zoom)) * _z)));
     rectangle.move(Vector(width() / 2, height() / 2) - (Vector(m_center) * _z));
     SysGraphics::draw_rectangle(_colors, rectangle, thickness);
 }
@@ -166,7 +166,7 @@ void Camera::zoom(float _zoom) {
 }
 
 Coordinate Camera::center() const {
-    return m_center;
+    return Coordinate(m_center.x() / zoom(), m_center.y() / zoom());
 }
 
 void Camera::center(const Coordinate & _center) {

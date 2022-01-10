@@ -12,10 +12,12 @@ namespace exst {
 class Arrow : public Object {
 public:
     virtual ~Arrow() { }
-    Arrow(World*, const Coordinate & tip, const Vector & launch_speed);
+    Arrow(World*, const Coordinate & tip, const Vector & launch_speed, const Color & feather_color = Random::r_Color());
     
     void update(float dt = 1) override;
     void draw(const Camera *) const override;
+    
+    float width() const override;
     
 private:
     Color m_feather_color;

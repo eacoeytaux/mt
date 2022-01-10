@@ -4,6 +4,7 @@
 
 #if defined(__APPLE__)
 #include <GLUT/glut.h>
+#include <SDL2/SDL.h>
 #else
 #include <GL/glut.h>
 #endif
@@ -20,8 +21,8 @@ bool Debug::on = false;
 #endif
 
 int window_handle = 0;
-GLsizei width = 800;
-GLsizei height = 600;
+GLsizei width = 1200;
+GLsizei height = 720;
 
 const int FPS = 60;
 uint8_t timer_wait = 1000 / FPS;
@@ -30,6 +31,8 @@ const bool ANTI_ALIAS = true;
 
 bool paused = false;
 float speed = 1;
+bool zooming_in = false;
+bool zooming_out = false;
 World world;
 
 void timer(int _t) {
@@ -38,6 +41,8 @@ void timer(int _t) {
 #ifdef MT_DEBUG
 //    cout << "loop " << loop << endl;
 #endif
+    if (zooming_in) world.camera_zoom_in();
+    if (zooming_out) world.camera_zoom_out();
     if (!paused) world.update(speed);
     glutPostRedisplay();
     glutTimerFunc(timer_wait, timer, 0);
@@ -90,11 +95,13 @@ void keyboard_down(unsigned char _key, int _x, int _y) {
             world.camera_width(width);
             world.camera_height(height);
             break;
+        case '.':
         case '>':
-            world.camera_zoom_in();
+            zooming_in = true;
             break;
+        case ',':
         case '<':
-            world.camera_zoom_out();
+            zooming_out = true;
             break;
         case 27: // esc
             glutDestroyWindow(window_handle);
@@ -132,6 +139,14 @@ void keyboard_up(unsigned char _key, int _x, int _y) {
         case 'p':
         case 'P':
             paused = !paused;
+            break;
+        case '.':
+        case '>':
+            zooming_in = false;
+            break;
+        case ',':
+        case '<':
+            zooming_out = false;
             break;
 #ifdef MT_DEBUG
         case '?':
@@ -182,13 +197,22 @@ void mouse_click(int _button, int _state, int _x, int _y) {
                 
                 world.player()->release_bow();
             }
+            break;
         default:
-        break;
+            break;
     }
 }
 
 void mouse_move(int _x, int _y) {
     world.mouse_movement(Coordinate((float)_x, (float)_y));
+}
+
+void mouse_wheel(int _button, int _direction, int _x, int _y) {
+    if (_direction > 0) {
+        world.camera_zoom_in();
+    } else {
+        world.camera_zoom_out();
+    }
 }
 
 void MTAPP::run() {
@@ -232,6 +256,9 @@ void MTAPP::run() {
     glutMouseFunc(mouse_click);
     glutMotionFunc(mouse_move);
     glutPassiveMotionFunc(mouse_move);
+    // glutMouseWheelFunc(mouse_wheel);
+    
+    glutSetCursor(GLUT_CURSOR_NONE);
     
     glutTimerFunc(timer_wait, timer, 0);
     glutMainLoop();

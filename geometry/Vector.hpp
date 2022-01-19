@@ -12,6 +12,7 @@ namespace geometry {
 /// @brief distance and direction from coordinate that defaults as origin
 class Vector {
 public:
+    virtual ~Vector() { }
     /// @param dx delta x
     /// @param dy delta y
     /// @param origin vector start point, default (0,0)

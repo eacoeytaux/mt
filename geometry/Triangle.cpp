@@ -58,7 +58,7 @@ float Triangle::area() const {
     return sqrt(s * (s - a) * (s - b) * (s - c));
 }
 
-int Triangle::sides() const {
+uint Triangle::sides() const {
     return 3;
 }
 
@@ -69,8 +69,39 @@ Shape & Triangle::move(const Vector & _vector) {
     return *this;
 }
 
-Shape & Triangle::rotate_about(const Angle & _angle, const Coordinate & _origin) {
-    m_c1.rotate_about(_angle, _origin);
+Shape & Triangle::scale(float _scale, const Coordinate & _origin) {
+    m_c1 = (Vector(m_c1) * _scale).destination();
+    m_c2 = (Vector(m_c1) * _scale).destination();
+    m_c3 = (Vector(m_c1) * _scale).destination();
+    return *this;
+}
+
+Shape & Triangle::rotate(const Angle & _angle, const Coordinate & _origin) {
+    m_c1.rotate(_angle, _origin);
+    m_c2.rotate(_angle, _origin);
+    m_c3.rotate(_angle, _origin);
+    return *this;
+}
+
+Shape & Triangle::mirror(const Vector & _axis) {
+    // align with x axis
+    m_c1 -= _axis.origin();
+    m_c2 -= _axis.origin();
+    m_c3 -= _axis.origin();
+    m_c1.rotate(_axis.angle() * -1);
+    m_c2.rotate(_axis.angle() * -1);
+    m_c3.rotate(_axis.angle() * -1);
+    // mirror
+    m_c1.y(m_c1.y() * -1);
+    m_c2.y(m_c2.y() * -1);
+    m_c3.y(m_c3.y() * -1);
+    // align with original axis
+    m_c1.rotate(_axis.angle());
+    m_c2.rotate(_axis.angle());
+    m_c3.rotate(_axis.angle());
+    m_c1 += _axis.origin();
+    m_c2 += _axis.origin();
+    m_c3 += _axis.origin();
     return *this;
 }
 

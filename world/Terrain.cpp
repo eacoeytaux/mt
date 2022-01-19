@@ -10,10 +10,9 @@ const int OUTLINE_THICKNESS = 3;
 const Color GRASS_COLOR_LIGHT = Color(0, 192, 0);
 const Color GRASS_COLOR_DARK = Color(0, 127, 0);
 
-Terrain::Terrain(World * world) : Object(world, Coordinate(), 0, 0, 1) {
+Terrain::Terrain(World * world) : Object(world, Matter(Coordinate(0, 0), { Rectangle(INFINITY, INFINITY) }, 1)) {
     layer_position(1);
-    m_casts_shadow = false;
-    m_gravity_ratio = 0;
+    gravity_ratio(0);
     
     shared_ptr<TerrainVertex> v0(new TerrainVertex(Coordinate(-800, 0)));
     shared_ptr<TerrainVertex> v1(new TerrainVertex(Coordinate(-100, 5)));
@@ -64,13 +63,13 @@ void Terrain::update(float dt) {
 
 void Terrain::draw(const Camera * _camera) const {
     for_each (vertex, vertices()) {
-        _camera->draw_polygon(GRASS_COLOR_DARK, Polygon(8, (THICKNESS / 2) + OUTLINE_THICKNESS, vertex->position()));
+        _camera->draw_shape(GRASS_COLOR_DARK, Polygon(8, (THICKNESS / 2) + OUTLINE_THICKNESS, vertex->position()));
     }
     for_each (edge, edges()) {
         _camera->draw_line(GRASS_COLOR_DARK, edge->line(), THICKNESS + (OUTLINE_THICKNESS * 2));
     }
     for_each (vertex, vertices()) {
-        _camera->draw_polygon(GRASS_COLOR_LIGHT, Polygon(8, THICKNESS / 2, vertex->position()));
+        _camera->draw_shape(GRASS_COLOR_LIGHT, Polygon(8, THICKNESS / 2, vertex->position()));
     }
     for_each (edge, edges()) {
         if (edge->vertex1() && edge->vertex2())
@@ -78,8 +77,6 @@ void Terrain::draw(const Camera * _camera) const {
     }
     
 //    for_each (edge : m_edges) {
-//        Random::seed(edge->vertex1()->position().x() * edge->vertex1()->position().y());
-//
 //        Line edge_line(edge->vertex1()->position(), edge->vertex2()->position());
 //        float x_min = edge_line.left().x();
 //        float x_max = edge_line.right().x();

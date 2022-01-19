@@ -29,6 +29,12 @@ Coordinate & Coordinate::y(float _y) {
     return *this;
 }
 
+Coordinate & Coordinate::xy(float _x, float _y) {
+    m_x = _x;
+    m_y = _y;
+    return *this;
+}
+
 float Coordinate::distance(const Coordinate & c) const {
     float dx = x() - c.x();
     float dy = y() - c.y();
@@ -39,11 +45,28 @@ float Coordinate::distance(const Coordinate & c) const {
     return sqrt(pow(dx, 2) + pow(dy, 2));
 }
 
-Coordinate & Coordinate::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+Coordinate & Coordinate::rotate(const Angle & _angle, const Coordinate & _origin) {
     Vector v = Vector(_origin, *this);
     v.rotate(_angle);
     *this = v.destination();
     return *this;
+}
+
+Coordinate & Coordinate::mirror(const Vector & _axis) {
+    xy(x() - _axis.origin().x(), y() - _axis.origin().y());
+    rotate(_axis.angle() * -1);
+    y(y() * -1);
+    rotate(_axis.angle());
+    xy(x() + _axis.origin().x(), y() + _axis.origin().y());
+    return *this;
+}
+
+Coordinate & Coordinate::mirror_x() {
+    return mirror(Vector(1, 0));
+}
+
+Coordinate & Coordinate::mirror_y() {
+    return mirror(Vector(0, 1));
 }
 
 QUADRANT Coordinate::quadrant() const {

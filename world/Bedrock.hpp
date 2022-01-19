@@ -9,7 +9,8 @@ namespace exst {
 
 class Bedrock : public Terrain {
 public:
-    Bedrock(World*);
+    virtual ~Bedrock() { }
+    Bedrock(World *);
     
     virtual void draw(const Camera *) const override; // todo add more overrides
     

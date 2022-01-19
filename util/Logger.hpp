@@ -21,14 +21,15 @@ enum MESSAGE_TYPE {
 class Logger {
 public:
     /// @brief initialization for Logger
-    static void start();
+    static bool start(bool file = false);
     /// @brief de-initialization for Logger
-    static void close();
+    static bool close();
     /// @brief print message to log file
     /// @param type type of message
     /// @param entry message
-    static void print(MESSAGE_TYPE type, const char * entry, ...);
-    // static void print(MESSAGE_TYPE type, const char * entry, const va_list & args);
+    static bool log(MESSAGE_TYPE type, const char * entry, ...);
+    /// @brief whether or not to print logs to console
+    static bool print_to_console(bool b);
     
 private:
     /// @brief should never be constructed

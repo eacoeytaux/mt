@@ -23,10 +23,14 @@ public:
     Polygon(int side_count, float radius, const Coordinate & center = Coordinate(0, 0), Angle rotation = Angle(0)); // creates equilateral
     
     Shape & move(const Vector & vector) override;
-    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & scale(float scale, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & rotate(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & mirror(const Vector & axis) override;
     
     float area() const override;
-    int sides() const override;
+    uint sides() const override;
+    
+    bool convex() const;
     
     float lower_bound_x() const;
     float lower_bound_y() const;

@@ -5,6 +5,7 @@
 
 #include "Color.hpp"
 #include "Visible.hpp"
+#include "Sprite.hpp"
 #include "Camera.hpp"
 
 #endif /* Graphics_hpp */

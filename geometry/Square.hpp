@@ -10,6 +10,7 @@ namespace geometry {
 
 class Square : public Rectangle {
 public:
+    virtual ~Square() { }
     Square(float width = 0, const Coordinate & center = Coordinate(), const Angle & angle = Angle());
     
     void width(const float);

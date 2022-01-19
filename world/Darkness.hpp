@@ -24,10 +24,12 @@ public:
     };
     
 public:
+    virtual ~Darkness() { }
     Darkness();
     
     void darkness_intensity(const float);
     void add_light_source(const Coordinate & position, const float distance, const float flicker = 0);
+    void add_light_source(const Coordinate & position, const float distance, const Color & tint, const float flicker = 0);
     void clear_light_sources();
     
     void draw(const Camera *) const;

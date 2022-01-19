@@ -76,7 +76,7 @@ Angle Line::angle() const {
     return Vector(c1(), c2()).angle();
 }
 
-void Line::rotate_around_origin(const Angle & a, const Coordinate & origin) {
+void Line::rotate(const Angle & a, const Coordinate & origin) {
     Vector v1(origin, c1());
     v1.rotate(a);
     c1(v1.destination());
@@ -84,6 +84,19 @@ void Line::rotate_around_origin(const Angle & a, const Coordinate & origin) {
     Vector v2(origin, c2());
     v2.rotate(a);
     c2(v2.destination());
+}
+
+void Line::mirror(const Vector & _axis) {
+    c1(c1().mirror(_axis));
+    c2(c2().mirror(_axis));
+}
+
+void Line::mirror_x() {
+    mirror(Vector(1, 0));
+}
+
+void Line::mirror_y() {
+    mirror(Vector(0, 1));
 }
 
 bool Line::vertical() const {
@@ -107,31 +120,37 @@ float Line::length() const {
 }
 
 float Line::x(float y) const {
-    // TODO
-    if (horizontal() || vertical()) {
-        return -0;
+    if (horizontal()) {
+        
+    } else if (vertical()) {
+        if (in_range<float>(y, c1().y(), c2().y())) {
+            return c1().x();
+        }
+    } else {
+        float x = (y - m_b) / m_m;
+        if (in_box(Coordinate(x, y))) {
+            return x;
+        }
     }
     
-    float x = (y - m_b) / m_m;
-    if (in_box(Coordinate(x, y))) {
-        return x;
-    } else {
-        return -0;
-    }
+    return -0;
 }
 
 float Line::y(float x) const {
-    // TODO
-    if (horizontal() || vertical()) {
-        return -0;
+    if (vertical()) {
+        
+    } else if (horizontal()) {
+        if (in_range<float>(x, c1().x(), c2().x())) {
+            return c1().y();
+        }
+    } else {
+        float y = (m_m * x) + m_b;
+        if (in_box(Coordinate(x, y))) {
+            return y;
+        }
     }
     
-    float y = (m_m * x) + m_b;
-    if (in_box(Coordinate(x, y))) {
-        return y;
-    } else {
-        return -0;
-    }
+    return -0;
 }
 
 Coordinate Line::right() const {

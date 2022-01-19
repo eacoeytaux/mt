@@ -15,6 +15,8 @@ const uint LAYER_PLAYER = 128;
 /// @brief anything that is visible
 class Visible {
 public:
+    virtual ~Visible() { }
+    
     virtual void draw(const Camera *) const = 0;
     
     Visible(uint layer_position = 0) : m_layer_position(layer_position) { }

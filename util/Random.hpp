@@ -12,13 +12,13 @@ namespace util {
 
 /// @class Random
 /// @brief interface for all RNG
-class Random { // TODO make this inheritable?
+class Random {
 public:
     /// @brief seed with current time
-    static void seed();
+    static bool seed();
     /// @brief seed with specified seed
     /// @param seed RNG seed
-    static void seed(unsigned int seed);
+    static bool seed(unsigned int seed);
     /// @brief random bool
     /// @param true_odds how likely a value of true is, 0 = no chance, 1 = guaranteed, default 0.5
     /// @return boolean with ( true_odds ) chance of true and ( 1 - true_odds ) chance of false

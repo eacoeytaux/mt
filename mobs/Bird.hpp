@@ -2,7 +2,7 @@
 #define Bird_hpp
 
 #include "mt.hpp"
-#include "Object.hpp"
+#include "Mob.hpp"
 
 namespace mt {
 namespace exst {
@@ -22,10 +22,15 @@ private:
 
 /// @class Bird
 /// @brief a winged flying creatures
-class Bird : public Object {
+class Bird : public Mob {
 public:
     virtual ~Bird() { }
     Bird(World *, const Coordinate & position);
+    
+    virtual void kill() override;
+    
+    virtual void update(float dt) override;
+    virtual void draw(const Camera *) const override;
     
 private:
     

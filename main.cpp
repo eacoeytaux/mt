@@ -1,13 +1,11 @@
-#include "mt_main.hpp"
-
-#ifdef MT_DEBUG
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
-#endif
+#include "mtapp.hpp"
+#include "mtest.hpp"
 
 int main(int argc, char * argv[]) {
-#ifdef MT_DEBUG
+#ifdef MT_TEST
+#include <iostream>
+std::cout << "\nRUNNING CATCH TESTS" << std::endl;
 if (catch_main(argc, argv)) return 1;
 #endif
-mt::MTAPP::run();
+mt::mtapp::run();
 }

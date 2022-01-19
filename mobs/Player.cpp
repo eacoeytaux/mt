@@ -3,26 +3,24 @@
 #include "World.hpp"
 #include "IcePick.hpp"
 #include "Arrow.hpp"
+#include "Hook.hpp"
 
 NAMESPACES
 using mt::exst::Player;
 
-bool Player::god_mode = true;
-
 const float WIDTH = 1.5 * METER;
 const float HEIGHT = 2 * METER;
-const float DEFAULT_SPEED = 1.0;
+const float DEFAULT_SPEED = 2.0;
 const float JUMP_STRENGTH = (1.0/3.0) * METER;
 const float JUMP_DEGRATION_RATIO = 0.9;
 const int JUMP_MAX_DURATION = 5;
 const int JUMP_RESET_WAIT_TIME = 0;
-const float RETICLE_DISTANCE = WIDTH * 2;
-const float RETICLE_WIDTH = 1;
-const float RETICLE_LENGTH = 9;
+
+// crossbox / hook
 const float DEFAULT_ROPE_MAX_LENGTH = HEIGHT * 3;
 const float DEFAULT_HOOK_GROWTH_SPEED = 20;
 const float DEFAULT_HOOK_RETRACT_SPEED = 30;
-const int RELOAD_TIME = 5;
+const int RELOAD_TIME = 12;
 
 // graphics
 static float BOW_ORIGIN_OFFSET_Y = METER / 4;
@@ -57,24 +55,28 @@ const Color LACE_COLOR = WHITE;
 const float HANDLE_LENGTH = 12;
 const Color CROSSBOW_COLOR = Color(164, 72, 32);
 
-Player::Player(World* _world, const Coordinate & _center) :
-Mob(_world, _center, WIDTH, HEIGHT),
+const float RETICLE_DISTANCE = WIDTH * 2;
+const float RETICLE_WIDTH = 1;
+const float RETICLE_LENGTH = 9;
+
+Player::Player(World * _world, const Coordinate & _center) :
+Mob(_world, _center, WIDTH, HEIGHT, 100),
 m_movement_speed(DEFAULT_SPEED),
 m_rope_max_length(DEFAULT_ROPE_MAX_LENGTH),
 m_hook_growth_speed(DEFAULT_HOOK_GROWTH_SPEED),
 m_hook_retract_speed(DEFAULT_HOOK_RETRACT_SPEED),
+m_hook(_world, position(), position()),
 m_rope(m_world, position(), DEFAULT_ROPE_MAX_LENGTH, DEFAULT_HOOK_GROWTH_SPEED, DEFAULT_HOOK_RETRACT_SPEED) {
-    m_world->camera_target(position(), true);
-    health(100);
     m_reload_timer.reset(0);
     layer_position(100); // TODO variablize
+    m_hook.max_length(6 * METER);
 #ifdef MT_DEBUG
     god(god_mode);
 #endif
 }
 
 void Player::adjust_velocity(float dt) {
-    if (!m_gravity_ratio) { // can fly?
+    if (!gravity_ratio()) { // can fly?
         if (m_looking_up) {
             if (m_moving_right && !m_moving_left) {
                 add_velocity(Vector(Angle(PI * 1/4), m_movement_speed) - Vector(m_movement_speed, 0));
@@ -126,7 +128,6 @@ void Player::adjust_velocity(float dt) {
 
 void Player::move(float dt) {
     Mob::move(dt);
-    m_world->camera_target(position());
 }
 
 void Player::kill() {
@@ -136,7 +137,7 @@ void Player::kill() {
     Mob::kill();
 }
 
-void Player::hurt(int _health) {
+void Player::hurt(uint _health) {
 #ifdef MT_DEBUG
     if (god_mode) return;
 #endif
@@ -144,12 +145,13 @@ void Player::hurt(int _health) {
 }
 
 void Player::update(float dt) {
+    Mob::update(dt);
+    
 #ifdef MT_DEBUG
     if (god_mode) {
-//        m_world->lights(true);
+        m_world->add_light_source(position(), max<float>(m_world->camera().width(), m_world->camera().height()));
     }
 #endif
-    Object::update(dt);
     m_world->add_light_source(position(), 100);
     
     m_rope.position(position());
@@ -159,28 +161,40 @@ void Player::update(float dt) {
     
     m_reload_timer.tick();
     
-    if (m_firing_arrow) {
+    if (m_firing_arrow || m_firing_hook) {
         if (!m_reload_timer.remaining()) {
-            m_world->add_object(shared_ptr<Object>(new Arrow(m_world, position() + Vector(m_aim_angle, 32), Vector(m_aim_angle /* + ((Random::r_Angle() / 16) - PI / 16) */, 32) + velocity())));
+            if (m_firing_arrow) {
+                m_world->add_projectile(shared_ptr<Object>(new Arrow(m_world, position() + Vector(m_aim_angle, 32), Vector(m_aim_angle /* + ((Random::r_Angle() / 16) - PI / 16) */, 32) + velocity())));
+            } else {
+                m_hook.fire(Vector(m_aim_angle, 32));
+//                m_world->add_object(shared_ptr<Object>(new Hook(m_world, position() + Vector(m_aim_angle, 32), m_aim_angle)));
+            }
             m_reload_timer.reset(RELOAD_TIME);
         }
+    } else if (!m_firing_hook) {
+        m_hook.retract();
+//        m_hook.position(position() + Vector(m_aim_angle, 32));
+//        m_hook.angle(m_aim_angle);
     }
+    
+    m_hook.base(position(), m_aim_angle);
+    m_hook.update(dt);
 }
 
 void Player::draw(const Camera * _camera) const {
 #ifdef MT_DEBUG
     if (god_mode) {
-        static Color glow = Color(WHITE, 32);
-        _camera->draw_circle(glow, Circle(METER * 2, position()));
-        _camera->draw_circle(glow, Circle(METER * 1.7, position()));
-        _camera->draw_circle(glow, Circle(METER * 1.3, position()));
+        static Color glow = Color(WHITE, 16);
+        _camera->draw_shape(glow, Circle(METER * 2, position()));
+        _camera->draw_shape(glow, Circle(METER * 1.7, position()));
+        _camera->draw_shape(glow, Circle(METER * 1.3, position()));
     }
 #endif
     
     // draw hook
-    m_rope.draw(_camera);
-    
-    Mob::draw(_camera);
+    m_hook.draw(_camera);
+    m_hook.draw_rope(_camera);
+//    m_rope.draw(_camera);
     
     draw_back_leg(_camera);
     draw_back_arm(_camera);
@@ -190,25 +204,7 @@ void Player::draw(const Camera * _camera) const {
     draw_accessories(_camera);
     draw_front_arm(_camera);
     
-#ifdef MT_DEBUG
-    if (Debug::on) {
-        _camera->draw_rectangle(MAGENTA, visable_box(), 1);
-        
-        if (!god_mode) { // no boundaries in god mode
-            for_each (terrain_edge, m_world->terrain()->edges()) {
-                _camera->draw_line(CYAN, terrain_edge->line() + Vector(0, m_height / 2), 1);
-            }
-        }
-        
-        _camera->draw_polygon(MAGENTA, Polygon(4, 3 / _camera->zoom(), position()));
-        Vector velocity_graphic = velocity();
-        velocity_graphic.origin(position());
-        velocity_graphic *= 2;
-        if (velocity_graphic.magnitude() > 1) {
-            _camera->draw_vector(MAGENTA, velocity_graphic, 3, velocity_graphic.magnitude(), 10);
-        }
-    }
-#endif
+    Mob::draw(_camera);
 }
 
 void Player::draw_head(const Camera * _camera) const {
@@ -217,8 +213,8 @@ void Player::draw_head(const Camera * _camera) const {
     
 //    _camera->draw_circle(HAT_COLOR, Circle(HEAD_RADIUS * 1.1, head_center - Vector(m_aim_angle, HEAD_RADIUS * 0.2) + Vector(m_aim_angle + (PI / 2), 4)));
     
-    _camera->draw_circle(HAIR_COLOR, Circle(HEAD_RADIUS, head_center));
-    _camera->draw_circle(SKIN_COLOR, Circle(HEAD_RADIUS * JACKET_HEAD_OPENING, face_center));
+    _camera->draw_shape(SKIN_COLOR, Circle(HEAD_RADIUS, head_center));
+    _camera->draw_shape(SKIN_COLOR, Circle(HEAD_RADIUS * JACKET_HEAD_OPENING, face_center));
     
     // ears
     // _camera->draw_circle(SKIN_COLOR, Circle(2, face_center + Vector(9, 0)));
@@ -231,15 +227,15 @@ void Player::draw_head(const Camera * _camera) const {
     m_blink_counter.tick();
     if (m_blink_counter.remaining() < BLINK_DURATION) {
         if (!m_blink_counter.remaining()) m_blink_counter.reset(Random::r_int(MIN_BLINK_GAP, MAX_BLINK_GAP));
-        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 1, face_center + Vector(5, -1)));
-        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 1, face_center + Vector(-5, -1)));
+        _camera->draw_shape(EYE_COLOR, Rectangle(3, 1, face_center + Vector(5, -1)));
+        _camera->draw_shape(EYE_COLOR, Rectangle(3, 1, face_center + Vector(-5, -1)));
     } else {
-        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 3, face_center + Vector(5, 0)));
-        _camera->draw_rectangle(EYE_COLOR, Rectangle(3, 3, face_center + Vector(-5, 0)));
+        _camera->draw_shape(EYE_COLOR, Rectangle(3, 3, face_center + Vector(5, 0)));
+        _camera->draw_shape(EYE_COLOR, Rectangle(3, 3, face_center + Vector(-5, 0)));
     }
     
-    _camera->draw_rectangle(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(0, -8)));
-    _camera->draw_rectangle(HAIR_COLOR, Rectangle(20, 12, face_center + Vector(0, -12)));
+    _camera->draw_shape(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(0, -8)));
+    _camera->draw_shape(HAIR_COLOR, Rectangle(20, 12, face_center + Vector(0, -12)));
 //    _camera->draw_rectangle(HAIR_COLOR, Rectangle(6, 12, face_center + Vector(-12, -5)));
 //    _camera->draw_rectangle(HAIR_COLOR, Rectangle(5, 12, face_center + Vector(11, -5)));
     
@@ -247,9 +243,9 @@ void Player::draw_head(const Camera * _camera) const {
 //    _camera->draw_rectangle(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(6, 10), (PI / 4)));
 //    _camera->draw_rectangle(HAIR_COLOR, Rectangle(8, 8, face_center + Vector(-6, 10), (PI / 4)));
     
-    Polygon hat = Polygon(varray<Coordinate>({ Coordinate(HEAD_RADIUS * 0.75, HEAD_RADIUS * 1.2), Coordinate(-HEAD_RADIUS * 0.75, HEAD_RADIUS * 1.2), Coordinate(-HEAD_RADIUS, HEAD_RADIUS / 2), Coordinate(HEAD_RADIUS, HEAD_RADIUS / 2) }));
-    Line brim = Line(face_center + Coordinate(-HEAD_RADIUS * 1.25, HEAD_RADIUS / 2), face_center + Coordinate(HEAD_RADIUS * 1.25, HEAD_RADIUS / 2));
-    hat.move(face_center);
+//    Polygon hat = Polygon(varray<Coordinate>({ Coordinate(HEAD_RADIUS * 0.75, HEAD_RADIUS * 1.2), Coordinate(-HEAD_RADIUS * 0.75, HEAD_RADIUS * 1.2), Coordinate(-HEAD_RADIUS, HEAD_RADIUS / 2), Coordinate(HEAD_RADIUS, HEAD_RADIUS / 2) }));
+//    Line brim = Line(face_center + Coordinate(-HEAD_RADIUS * 1.25, HEAD_RADIUS / 2), face_center + Coordinate(HEAD_RADIUS * 1.25, HEAD_RADIUS / 2));
+//    hat.move(face_center);
 //    _camera->draw_polygon(HAT_COLOR, hat);
 //    _camera->draw_line(HAT_COLOR, brim, 4);
 }
@@ -258,36 +254,43 @@ void Player::draw_body(const Camera * _camera) const {
     //    _camera->draw_rectangle(MID_COLOR, Rectangle(BODY_WIDTH, BODY_HEIGHT, position() + Vector(0, -BOW_ORIGIN_OFFSET_Y)));
     
     // pants base
-    _camera->draw_rectangle(PANTS_COLOR, Rectangle(BODY_WIDTH - 4, BODY_HEIGHT * (1.0/3.0), position() + Vector(0, -BOW_ORIGIN_OFFSET_Y + (-BODY_HEIGHT * (1.0/4.0)))));
+    _camera->draw_shape(PANTS_COLOR, Rectangle(BODY_WIDTH - 4, BODY_HEIGHT * (1.0/3.0), position() + Vector(0, -BOW_ORIGIN_OFFSET_Y + (-BODY_HEIGHT * (1.0/4.0)))));
     
     _camera->draw_line(BLACK, Line(position() + Vector((BODY_WIDTH - 2) / 2, -BOW_ORIGIN_OFFSET_Y - (BODY_HEIGHT * (1.0/4.0)) + 3), position() + Vector(-(BODY_WIDTH - 2) / 2, -BOW_ORIGIN_OFFSET_Y - (BODY_HEIGHT * (1.0/4.0)) + 3)), 4);
     
     // undershirt
-    _camera->draw_rectangle(WHITE, Rectangle(BODY_WIDTH * 0.5, BODY_HEIGHT * (2.0/3.0), position() + Vector(0, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
+    _camera->draw_shape(WHITE, Rectangle(BODY_WIDTH * 0.5, BODY_HEIGHT * (2.0/3.0), position() + Vector(0, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
     
     // jacket
-    _camera->draw_rectangle(JACKET_COLOR, Rectangle(BODY_WIDTH / 3, BODY_HEIGHT * (2.0/3.0), position() + Vector(BODY_WIDTH / 3, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
-    _camera->draw_rectangle(JACKET_COLOR, Rectangle(BODY_WIDTH / 3, BODY_HEIGHT * (2.0/3.0), position() + Vector(-BODY_WIDTH / 3.5, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
+    _camera->draw_shape(JACKET_COLOR, Rectangle(BODY_WIDTH / 3, BODY_HEIGHT * (2.0/3.0), position() + Vector(BODY_WIDTH / 3, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
+    _camera->draw_shape(JACKET_COLOR, Rectangle(BODY_WIDTH / 3, BODY_HEIGHT * (2.0/3.0), position() + Vector(-BODY_WIDTH / 3.5, -BOW_ORIGIN_OFFSET_Y + (BODY_HEIGHT * (1.0/6.0)))));
 }
 
 void Player::draw_front_arm(const Camera * _camera) const {
     Coordinate shoulder_joint_left = position() + Vector(-(BODY_WIDTH / 2) + 4, (BODY_HEIGHT / 2) - BOW_ORIGIN_OFFSET_Y);
     Coordinate hand_left = position() + Vector(m_aim_angle - (PI / 4), HANDLE_LENGTH);
     
-    _camera->draw_circle(SKIN_COLOR, Circle(ARM_WIDTH / 2, hand_left));
+    if ((m_aim_angle > (PI / 2)) && (m_aim_angle < (PI * 1.5))) {
+        shoulder_joint_left.mirror(Vector(0, 1, position()));
+        hand_left = position() + Vector(m_aim_angle + (PI / 4), HANDLE_LENGTH);
+    }
     
-//    Line left_arm = Line(shoulder_joint_left, hand_left);
-//    _camera->draw_line(JACKET_FRONT_COLOR, left_arm, ARM_WIDTH);
+    _camera->draw_shape(SKIN_COLOR, Circle(ARM_WIDTH / 2, hand_left));
     
-    Joint arm = Joint(shoulder_joint_left, 15, 14, hand_left);
+    Joint arm = Joint(shoulder_joint_left, 15, 14, hand_left, !((m_aim_angle > (PI / 2)) && (m_aim_angle < (PI * 1.5))));
     _camera->draw_line(JACKET_FRONT_COLOR, Line(arm.c1(), arm.joint()), ARM_WIDTH);
-    _camera->draw_circle(JACKET_FRONT_COLOR, Circle(ARM_WIDTH / 2, arm.joint()));
+    _camera->draw_shape(JACKET_FRONT_COLOR, Circle(ARM_WIDTH / 2, arm.joint()));
     _camera->draw_line(JACKET_FRONT_COLOR, Line(arm.joint(), arm.c2()), ARM_WIDTH);
 }
 
 void Player::draw_front_leg(const Camera * _camera) const {
     Coordinate hip_joint_left = position() + Vector(-(BODY_WIDTH / 2) + (LEG_WIDTH / 2) + 3, -(BODY_HEIGHT / 2));
     Coordinate foot_joint_left = position() + Vector(-(BODY_WIDTH / 2) + (LEG_WIDTH / 2) + 3, -(BODY_HEIGHT / 2) - LEG_LENGTH);
+    
+    if ((m_aim_angle > (PI / 2)) && (m_aim_angle < (PI * 1.5))) {
+        hip_joint_left.mirror(Vector(0, 1, position()));
+        foot_joint_left.mirror(Vector(0, 1, position()));
+    }
     
     if (m_ground && (m_moving_left ^ m_moving_right)) {
         if (m_moving_left) foot_joint_left += Vector((float)((m_world->age() + 8) % 16) - 8, 0);
@@ -296,23 +299,18 @@ void Player::draw_front_leg(const Camera * _camera) const {
     
     Line left_leg = Line(hip_joint_left, foot_joint_left);
     
-    Rectangle left_boot_base = Rectangle(LEG_WIDTH + 7, 5, foot_joint_left + Vector(1.5, 0));
-    Rectangle left_boot_shin = Rectangle(LEG_WIDTH + 4, 9, foot_joint_left + Vector(0, 2));
-    Rectangle left_boot_sole = Rectangle(LEG_WIDTH + 5, 2, foot_joint_left + Vector(1.5, -3));
-    Line lace_1 = Line(foot_joint_left + Vector(5, 5), foot_joint_left + Vector(-3, 5));
-    Line lace_2 = Line(foot_joint_left + Vector(5, 3), foot_joint_left + Vector(-3, 3));
-    
     _camera->draw_line(PANTS_COLOR, left_leg, LEG_WIDTH);
-    _camera->draw_rectangle(BOOT_COLOR, left_boot_shin);
-    _camera->draw_line(LACE_COLOR, lace_1, 1);
-    _camera->draw_line(LACE_COLOR, lace_2, 1);
-    _camera->draw_rectangle(SOLE_COLOR, left_boot_sole);
-    _camera->draw_rectangle(BOOT_COLOR, left_boot_base);
+    draw_boot(_camera, foot_joint_left);
 }
 
 void Player::draw_back_arm(const Camera * _camera) const {
     Coordinate shoulder_joint_right = position() + Vector((BODY_WIDTH / 2) - (ARM_WIDTH / 2) - 4, (BODY_HEIGHT / 2) - (ARM_WIDTH / 2) - BOW_ORIGIN_OFFSET_Y);
     Coordinate hand_right = position() + Vector(m_aim_angle - (PI / 8), 24);
+    
+    if ((m_aim_angle > (PI / 2)) && (m_aim_angle < (PI * 1.5))) {
+        shoulder_joint_right.mirror(Vector(0, 1, position()));
+        hand_right = position() + Vector(m_aim_angle + (PI / 8), 24);
+    }
     
     Line right_arm = Line(shoulder_joint_right, hand_right);
     _camera->draw_line(JACKET_BACK_COLOR, right_arm, ARM_WIDTH);
@@ -323,12 +321,17 @@ void Player::draw_back_arm(const Camera * _camera) const {
 //    _camera->draw_circle(JACKET_BACK_COLOR, Circle(ARM_WIDTH / 2, arm.joint()));
 //    _camera->draw_line(JACKET_BACK_COLOR, Line(arm.joint(), arm.c2()), ARM_WIDTH);
     
-    _camera->draw_circle(SKIN_COLOR, Circle(ARM_WIDTH / 2, hand_right));
+    _camera->draw_shape(SKIN_COLOR, Circle(ARM_WIDTH / 2, hand_right));
 }
 
 void Player::draw_back_leg(const Camera * _camera) const {
     Coordinate hip_joint_right = position() + Vector((BODY_WIDTH / 2) - (LEG_WIDTH / 2) - 3, -(BODY_HEIGHT / 2));
     Coordinate foot_joint_right = position() + Vector((BODY_WIDTH / 2) - (LEG_WIDTH / 2) - 3, -(BODY_HEIGHT / 2) - LEG_LENGTH);
+    
+    if ((m_aim_angle > (PI / 2)) && (m_aim_angle < (PI * 1.5))) {
+        hip_joint_right.mirror(Vector(0, 1, position()));
+        foot_joint_right.mirror(Vector(0, 1, position()));
+    }
     
     if (m_ground && (m_moving_left ^ m_moving_right)) {
         if (m_moving_left) foot_joint_right += Vector((float)(m_world->age() % 16) - 8, 0);
@@ -336,18 +339,34 @@ void Player::draw_back_leg(const Camera * _camera) const {
     }
     
     Line right_leg = Line(hip_joint_right, foot_joint_right);
-    Rectangle right_boot_base = Rectangle(LEG_WIDTH + 7, 5, foot_joint_right + Vector(1.5, 0));
-    Rectangle right_boot_shin = Rectangle(LEG_WIDTH + 4, 9, foot_joint_right + Vector(0, 2));
-    Rectangle right_boot_sole = Rectangle(LEG_WIDTH + 5, 2, foot_joint_right + Vector(1.5, -3));
-    Line lace_1 = Line(foot_joint_right + Vector(5, 5), foot_joint_right + Vector(-3, 5));
-    Line lace_2 = Line(foot_joint_right + Vector(5, 3), foot_joint_right + Vector(-3, 3));
     
     _camera->draw_line(PANTS_COLOR, right_leg, LEG_WIDTH);
-    _camera->draw_rectangle(BOOT_COLOR, right_boot_shin);
-    _camera->draw_line(LACE_COLOR, lace_1, 1);
-    _camera->draw_line(LACE_COLOR, lace_2, 1);
-    _camera->draw_rectangle(SOLE_COLOR, right_boot_sole);
-    _camera->draw_rectangle(BOOT_COLOR, right_boot_base);
+    draw_boot(_camera, foot_joint_right);
+}
+
+void Player::draw_boot(const Camera * _camera, const Coordinate & _foot_position) const {
+    Rectangle boot_base = Rectangle(LEG_WIDTH + 7, 5, Coordinate(1.5, 0));
+    Rectangle boot_shin = Rectangle(LEG_WIDTH + 4, 9, Coordinate(0, 2));
+    Rectangle boot_sole = Rectangle(LEG_WIDTH + 7, 2, Coordinate(1.5, -3));
+    Line lace_1 = Line(Coordinate(5, 5), Coordinate(-3, 5));
+    Line lace_2 = Line(Coordinate(5, 3), Coordinate(-3, 3));
+    
+    if (velocity().dx() < 0) {
+        boot_base.mirror(Vector(0, 1));
+        boot_shin.mirror(Vector(0, 1));
+        boot_sole.mirror(Vector(0, 1));
+        lace_1.mirror(Vector(0, 1));
+        lace_2.mirror(Vector(0, 1));
+    }
+    
+    Sprite boot;
+    boot.add_shape(boot_sole, SOLE_COLOR);
+    boot.add_shape(boot_shin, BOOT_COLOR);
+    boot.add_shape(lace_1, LACE_COLOR);
+    boot.add_shape(lace_2, LACE_COLOR);
+    boot.add_shape(boot_base, BOOT_COLOR);
+    
+    _camera->draw_sprite(boot, _foot_position);
 }
 
 void Player::draw_accessories(const Camera * _camera) const {
@@ -361,15 +380,23 @@ void Player::draw_accessories(const Camera * _camera) const {
     static Polygon crossbow_static;
     if (!set) {
         float scale = 5;
-        crossbow_static = Polygon({ Coordinate(6 * scale, 0 * scale), Coordinate(0 * scale, 0 * scale), Coordinate(-2 * scale, -2 * scale), Coordinate(-4 * scale, -2 * scale), Coordinate(-4 * scale, -4 * scale), Coordinate(1 * scale, -1 * scale), Coordinate(5 * scale, -1 * scale) });
+        crossbow_static = Polygon({ Coordinate(6, 0 ), Coordinate(0, 0), Coordinate(-2, -2), Coordinate(-4, -2), Coordinate(-4, -4), Coordinate(1, -1), Coordinate(5, -1) });
+        crossbow_static.scale(scale);
         set = true;
     }
-    Polygon crossbow = crossbow_static;
-    crossbow.move(position());
-    crossbow.rotate_about(m_aim_angle, position());
+    
+    Polygon crossbow = crossbow_static + position();
     Line crossbow_handle = Line(position() + Vector(22, 0), position() + Vector(22, -HANDLE_LENGTH));
-    crossbow_handle.rotate_around_origin(m_aim_angle, position());
-    _camera->draw_polygon(CROSSBOW_COLOR, crossbow);
+    
+    if ((m_aim_angle > (PI / 2)) && (m_aim_angle < (PI * 1.5))) {
+        crossbow.mirror(Vector(1, 0, position()));
+        crossbow_handle.mirror(Vector(1, 0, position()));
+    }
+    
+    crossbow.rotate(m_aim_angle, position());
+    crossbow_handle.rotate(m_aim_angle, position());
+    
+    _camera->draw_shape(CROSSBOW_COLOR, crossbow);
     _camera->draw_line(CROSSBOW_COLOR, crossbow_handle, 4);
     
     static Color feather_color = MAGENTA; //Random::r_Color();
@@ -379,11 +406,11 @@ void Player::draw_accessories(const Camera * _camera) const {
 
 void Player::draw_reticle(const Camera * _camera) const {
     if (m_aiming) {
-        _camera->draw_rectangle(BLACK, Rectangle((RETICLE_LENGTH + 2) / _camera->zoom(), (RETICLE_WIDTH + 2) / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
-        _camera->draw_rectangle(BLACK, Rectangle((RETICLE_WIDTH + 2) / _camera->zoom(), (RETICLE_LENGTH + 2) / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_shape(BLACK, Rectangle((RETICLE_LENGTH + 2) / _camera->zoom(), (RETICLE_WIDTH + 2) / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_shape(BLACK, Rectangle((RETICLE_WIDTH + 2) / _camera->zoom(), (RETICLE_LENGTH + 2) / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
         
-        _camera->draw_rectangle(WHITE, Rectangle(RETICLE_WIDTH / _camera->zoom(), RETICLE_LENGTH / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
-        _camera->draw_rectangle(WHITE, Rectangle(RETICLE_LENGTH / _camera->zoom(), RETICLE_WIDTH / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_shape(WHITE, Rectangle(RETICLE_WIDTH / _camera->zoom(), RETICLE_LENGTH / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
+        _camera->draw_shape(WHITE, Rectangle(RETICLE_LENGTH / _camera->zoom(), RETICLE_WIDTH / _camera->zoom(), position() + Vector(m_aim_angle, RETICLE_DISTANCE)), 0);
     }
 }
 

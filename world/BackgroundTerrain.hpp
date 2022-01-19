@@ -5,7 +5,7 @@
 #include "Object.hpp"
 
 namespace mt {
-namespace util {
+namespace exst {
 
 /// @class BackgroundTerrain
 /// @brief non-interactable background terrain (visual only)

@@ -5,6 +5,7 @@
 
 #include "Fire.hpp"
 #include "Tree.hpp"
+#include "Bird.hpp"
 
 NAMESPACES
 using mt::exst::World;
@@ -20,23 +21,36 @@ const float RETICLE_LENGTH = 9;
 World::World() :
 m_sky(this),
 m_terrain(shared_ptr<Terrain>(new Terrain(this))) {
-    m_objects = varray<shared_ptr<Object>>(0);
+    m_objects_all = varray<shared_ptr<Object>>(0);
+    m_objects_sorted_xy = varray<shared_ptr<Object>>(0);
+    m_objects_sorted_z = varray<shared_ptr<Object>>(0);
+    m_object_queue = varray<shared_ptr<Object>>(0);
     reset();
 }
 
-void World::reset() {
-    m_age = 0;
-    
+World::~World() {
+    clean_up();
+}
+
+void World::clean_up() {
     clear_objects();
+}
+
+void World::reset() {
+    clean_up();
+    
+    m_age = 0;
     m_camera.zoom(1);
     
     m_darkness = shared_ptr<Darkness>(new Darkness());
     
     m_wind = Vector(-1.5, 0);
-    m_sky = Sky(this, 200);
+//    m_sky = Sky(this, 200);
+    
+    m_background_terrain = shared_ptr<BackgroundTerrain>(new BackgroundTerrain(this, 0.75));
     
     m_terrain = shared_ptr<Terrain>(new Terrain(this));
-    m_objects.push_back(m_terrain);
+    add_object(m_terrain);
     
     for_each (terrain_edge, m_terrain->edges()) {
         int tree_count = Random::r_int(0, 2);
@@ -48,6 +62,8 @@ void World::reset() {
     
     add_object(shared_ptr<Fire>(new Fire(this, Coordinate(0, 30))));
     
+    add_object(shared_ptr<Bird>(new Bird(this, Coordinate(-100, 100))));
+    
     for_range(START_AGE) update();
     
     m_player = shared_ptr<Player>(new Player(this, Coordinate(120, 200)));
@@ -57,10 +73,8 @@ void World::reset() {
 void World::update(float dt) {
     ++m_age;
     
-    m_camera.update(dt);
-    
     // sort object list
-    struct object_less_than {
+    struct object_update_less_than {
         // sort in order of z (includes layers), then x, then y
         inline bool operator() (const shared_ptr<Object> & obj1, const shared_ptr<Object> & obj2) {
             if (obj1->z() != obj2->z()) {
@@ -74,42 +88,122 @@ void World::update(float dt) {
         }
     };
     
-    sort(m_objects.begin(), m_objects.end(), object_less_than());
+    add_objects_from_queue();
+    sort(m_objects_sorted_xy.begin(), m_objects_sorted_xy.end(), object_update_less_than());
     
     // m_terrain.update(float dt = 1);
     m_darkness->clear_light_sources();
+    
     m_sky.update(dt);
     
-    for_each (object, m_objects) object->update(dt);
+    // update all objects
+    for_each (object, m_objects_sorted_xy) object->update_object(dt);
     
-    for_each (object, m_object_queue) m_objects.push_back(object);
-    m_object_queue.clear();
+    // delete marked objects
+    // TODO
     
     Coordinate camera_center_pre = m_camera.center();
-    
+    if (m_player) camera_target(m_player->position());
+    m_camera.update(dt); // must come after camera target is updated
     Coordinate camera_center_post = m_camera.center();
     Vector d_camera_center = camera_center_post - camera_center_pre;
     m_mouse_position += d_camera_center;
 }
 
+void World::clear_objects() {
+    m_objects_all.clear();
+    m_objects_sorted_xy.clear();
+    m_objects_sorted_z.clear();
+    m_object_queue.clear();
+}
+
+varray<shared_ptr<Object>> World::all_objects() const {
+    return m_objects_all;
+}
+
+varray<shared_ptr<Object>> World::objects_in_range(const Rectangle & _rectangle) const {
+    varray<shared_ptr<Object>> objects;
+    
+    for_each (object, m_objects_sorted_xy) {
+        // TODO add hitbox width / height
+        
+        if (in_range<float>(object->position().x(), _rectangle.center().x() + (_rectangle.width() / 2), _rectangle.center().x() - (_rectangle.width() / 2))) { // check x
+            if (in_range<float>(object->position().y(), _rectangle.center().y() + (_rectangle.height() / 2), _rectangle.center().y() - (_rectangle.height() / 2))) { // check y
+                objects.push_back(object);
+            }
+        }
+    }
+    
+    return objects;
+}
+
+void World::add_object(shared_ptr<Object> _object) {
+    m_object_queue.push_back(_object);
+}
+
+void World::add_projectile(shared_ptr<Object> _object) {
+    m_projectiles.push_back(_object);
+    add_object(_object);
+}
+
+void World::add_objects_from_queue() {
+    for_each (object, m_object_queue) {
+        add_object_from_queue(object);
+    }
+    m_object_queue.clear();
+}
+
+void World::add_object_from_queue(shared_ptr<Object> _object) {
+    m_objects_all.push_back(_object);
+    m_objects_sorted_xy.push_back(_object);
+    m_objects_sorted_z.push_back(_object);
+}
+
+void World::add_light_source(const Coordinate & _position, const float _distance, const float _flicker) {
+    m_darkness->add_light_source(_position, _distance, _flicker);
+}
+
+void World::add_light_source(const Coordinate & _position, const float _distance, const Color & _tint, const float _flicker) {
+    m_darkness->add_light_source(_position, _distance, _tint, _flicker);
+}
+
 void World::draw() const {
     const Camera * camera = &m_camera;
+    
+    // sort object list
+    struct object_draw_less_than {
+        // sort in order of z (includes layers), then x, then y
+        inline bool operator() (const shared_ptr<Object> & obj1, const shared_ptr<Object> & obj2) {
+            if (obj1->z() != obj2->z()) {
+                return (obj1->z() < obj2->z());
+            } else {
+                if (obj1->layer_position() != obj2->layer_position()) return (obj1->layer_position() < obj2->layer_position());
+            }
+            return false;
+        }
+    };
+    
+    sort(m_objects_sorted_z.begin(), m_objects_sorted_z.end(), object_draw_less_than());
+    
     m_sky.draw(camera);
-    // m_terrain->draw(camera);
-    for_each (object, m_objects) object->draw(camera);
+    if (m_background_terrain) m_background_terrain->draw(camera);
+    for_each (object, m_objects_sorted_z) object->draw_object(camera);
     m_darkness->draw(camera);
 #ifdef MT_DEBUG
     if (Debug::on) {
-        float BARRIER_THICKNESS = 4 / m_camera.zoom();
-        m_camera.draw_rectangle(RED, Rectangle(2 * (m_camera.width() + (BARRIER_THICKNESS / 2)), 2 * (m_camera.height() + (BARRIER_THICKNESS / 2)), Coordinate(0, 0)), BARRIER_THICKNESS + 1, 0);
+        for_each (object, m_objects_sorted_z) object->draw_debug(camera);
+        m_camera.debug_overlay();
     }
 #endif
-    // reticle
-    m_camera.draw_rectangle(BLACK, Rectangle((RETICLE_LENGTH + 2) / m_camera.zoom(), (RETICLE_WIDTH + 2) / m_camera.zoom(), m_mouse_position), 0);
-    m_camera.draw_rectangle(BLACK, Rectangle((RETICLE_WIDTH + 2) / m_camera.zoom(), (RETICLE_LENGTH + 2) / m_camera.zoom(), m_mouse_position), 0);
-    m_camera.draw_rectangle(WHITE, Rectangle(RETICLE_WIDTH / m_camera.zoom(), RETICLE_LENGTH / m_camera.zoom(), m_mouse_position), 0);
-    m_camera.draw_rectangle(WHITE, Rectangle(RETICLE_LENGTH / m_camera.zoom(), RETICLE_WIDTH / m_camera.zoom(), m_mouse_position), 0);
+    draw_cursor();
+    m_camera.render();
+}
     
+void World::draw_cursor() const {
+     m_camera.draw_shape(BLACK, Rectangle((RETICLE_LENGTH + 2) / m_camera.zoom(), (RETICLE_WIDTH + 2) / m_camera.zoom(), m_mouse_position), 0);
+     m_camera.draw_shape(BLACK, Rectangle((RETICLE_WIDTH + 2) / m_camera.zoom(), (RETICLE_LENGTH + 2) / m_camera.zoom(), m_mouse_position), 0);
+     m_camera.draw_shape(WHITE, Rectangle(RETICLE_WIDTH / m_camera.zoom(), RETICLE_LENGTH / m_camera.zoom(), m_mouse_position), 0);
+     m_camera.draw_shape(WHITE, Rectangle(RETICLE_LENGTH / m_camera.zoom(), RETICLE_WIDTH / m_camera.zoom(), m_mouse_position), 0);
 }
 
 void World::mouse_movement(const Coordinate & screen_pos) {
@@ -120,8 +214,10 @@ void World::mouse_movement(const Coordinate & screen_pos) {
     world_pos = center_offset.destination();
     m_mouse_position = world_pos;
     
-    Angle angle_from_player = Vector(m_player->position(), m_mouse_position).angle();
-    m_player->aim(angle_from_player);
+    if (m_player) {
+        Angle angle_from_player = Vector(m_player->position(), m_mouse_position).angle();
+        m_player->aim(angle_from_player);
+    }
 }
 
 Coordinate World::mouse_position() const {
@@ -160,6 +256,10 @@ void World::camera_height(float _height) {
     m_camera.height(_height);
 }
 
+void World::camera_zoom(const float _zoom) {
+    m_camera.zoom(_zoom);
+}
+
 void World::camera_zoom_in() {
     m_camera.zoom(m_camera.zoom() / CAMERA_ZOOM_RATIO);
 }
@@ -186,17 +286,4 @@ Vector World::wind() const {
 
 void World::wind(const Vector & _WIND) {
     m_wind = _WIND;
-}
-
-void World::clear_objects() {
-    m_objects.clear();
-    m_object_queue.clear();
-}
-
-void World::add_object(shared_ptr<Object> _object) {
-    m_object_queue.push_back(_object);
-}
-
-void World::add_light_source(const Coordinate & _position, const float _distance, const float _flicker) {
-    m_darkness->add_light_source(_position, _distance, _flicker);
 }

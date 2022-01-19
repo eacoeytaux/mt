@@ -23,7 +23,7 @@ void Bedrock::draw(const Camera * _camera) const {
     }
     coordinates.push_back(Coordinate(last_edge->vertex2()->position().x(), bottom_y));
     
-    _camera->draw_polygon(BEDROCK_COLOR, Polygon(coordinates));
+    _camera->draw_shape(BEDROCK_COLOR, Polygon(coordinates));
     
     Terrain::draw(_camera);
 }

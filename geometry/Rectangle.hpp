@@ -14,8 +14,9 @@ class Circle;
 
 class Rectangle : public Shape {
 public:
+    virtual ~Rectangle() { }
     Rectangle(float width = 0, float height = 0, const Coordinate & center = Coordinate(), const Angle & rotation = Angle());
-    Rectangle(const Coordinate & c1, const Coordinate & c2 = Coordinate(), const Angle & rotation = Angle());
+    Rectangle(const Coordinate & farthest, const Coordinate & closest = Coordinate(), const Angle & rotation = Angle());
     
     Coordinate center() const;
     Rectangle & center(const Coordinate & center);
@@ -26,7 +27,9 @@ public:
     Angle rotation() const;
     
     Shape & move(const Vector & vector) override;
-    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & scale(float scale, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & rotate(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & mirror(const Vector & axis) override;
     
     Coordinate top_right() const;
     Coordinate top_left() const;
@@ -42,13 +45,11 @@ public:
     float upper_bound_y() const;
     float diagonal_length() const;
     float area() const override;
-    int sides() const override;
+    uint sides() const override;
     
     bool contains(const Coordinate &) const;
     bool intersects(const Line &) const;
     Line intersection(const Line &) const;
-    bool intersects(const Rectangle &) const;
-    bool intersects(const Circle &) const;
     
     varray<Coordinate> coordinates() const override;
     varray<Line> lines() const override;

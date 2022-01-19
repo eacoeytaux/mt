@@ -34,6 +34,7 @@ enum AXIS {
 /// @brief cartesian coordinate
 class Coordinate {
 public:
+    virtual ~Coordinate() { }
     /// @param x x
     /// @param y y
     Coordinate(float x = 0, float y = 0);
@@ -48,13 +49,21 @@ public:
     /// @param y y
     Coordinate & y(float y);
     
+    /// @param x x
+    /// @param y y
+    Coordinate & xy(float x, float y);
+    
     /// @param coordinate coordinate to measure distance from
     /// @return distance from coordinate
     float distance(const Coordinate & coordinate) const;
     
     /// @param angle angle to rotate by
     /// @param origin origin to rotate around, default true origin
-    Coordinate & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0));
+    Coordinate & rotate(const Angle & angle, const Coordinate & origin = Coordinate(0, 0));
+    /// @param axis axis to mirror on
+    Coordinate & mirror(const Vector & axis);
+    Coordinate & mirror_x();
+    Coordinate & mirror_y();
     
     /// @return which quadrant coordinate is in if any
     QUADRANT quadrant() const;

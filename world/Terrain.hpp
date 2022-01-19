@@ -12,6 +12,7 @@ namespace exst {
 
 class Terrain : public Object {
 public:
+    virtual ~Terrain() { }
     Terrain(World *);
     
     const varray<shared_ptr<TerrainVertex>> & vertices() const;

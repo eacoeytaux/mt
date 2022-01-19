@@ -42,8 +42,19 @@ Shape & Circle::move(const Vector & vector) {
     return *this;
 }
 
-Shape & Circle::rotate_about(const Angle & _angle, const Coordinate & _origin) {
-    center(center().rotate_about(_angle, _origin));
+Shape & Circle::scale(float _scale, const Coordinate & _origin) {
+    radius(radius() * _scale);
+    center(center() + (Vector(center() - _origin) * _scale).destination());
+    return *this;
+}
+
+Shape & Circle::rotate(const Angle & _angle, const Coordinate & _origin) {
+    center(center().rotate(_angle, _origin));
+    return *this;
+}
+
+Shape & Circle::mirror(const Vector & _axis) {
+    center(center().mirror(_axis));
     return *this;
 }
 
@@ -67,7 +78,7 @@ float Circle::area() const {
     return PI * pow(radius(), 2);
 }
 
-int Circle::sides() const {
+uint Circle::sides() const {
     return CIRCLE_PRECISION;
 }
 

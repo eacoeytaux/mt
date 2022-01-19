@@ -8,30 +8,32 @@
 namespace mt {
 namespace graphics {
 
+enum GRAPHICS_SETTINGS {
+    BASIC,
+    FANCY
+};
+
 /// @class SysGraphics
 /// @brief interface for system graphics
 class SysGraphics {
 public:
-#ifdef MT_DEBUG
-    /// @param arrow_shaft_length length of shaft of vector
-    /// @param arrow_head_length length of head of vector
-    static void draw_vector(const Color &, const Vector &, const unsigned int thickness = 1, const unsigned int arrow_shaft_length = 50, const unsigned int arrow_head_length = 10);
-#endif
+    static GRAPHICS_SETTINGS fanciness();
+    static bool set_blend_normal();
+    static bool set_blend_add();
+    static bool show_cursor(bool);
+    
+    static bool start(uint32_t width, uint32_t height);
+    static bool clear(const Color & = BLACK);
+    static bool render();
+    static bool close();
+    
     static void draw_line(const Color &, const Line &, const unsigned int thickness = 1);
     static void draw_lines(const Color &, const varray<Line> &, const unsigned int thickness = 1);
     static void draw_lines(const Colors &, const varray<Line> &, const unsigned int thickness = 1);
     static void draw_triangle(const Color &, const Triangle &, const unsigned int thickness = FILLED);
     static void draw_triangle(const Colors &, const Triangle &, const unsigned int thickness = FILLED);
-    static void draw_rectangle(const Color &, const Rectangle &, const unsigned int thickness = FILLED);
-    static void draw_rectangle(const Colors &, const Rectangle &, const unsigned int thickness = FILLED);
-    static void draw_square(const Color &, const Square &, const unsigned int thickness = FILLED);
-    static void draw_square(const Colors &, const Square &, const unsigned int thickness = FILLED);
     static void draw_polygon(const Color &, const Polygon &, const unsigned int thickness = FILLED);
     static void draw_polygon(const Colors &, const Polygon &, const unsigned int thickness = FILLED);
-    static void draw_circle(const Color &, const Circle &, const unsigned int thickness = FILLED);
-    static void draw_circle(const Colors &, const Circle &, const unsigned int thickness = FILLED);
-    static void draw_shape(const Color &, const Shape &, const unsigned int thickness = FILLED);
-    static void draw_shape(const Colors &, const Shape &, const unsigned int thickness = FILLED);
 
 private:
     SysGraphics() { }

@@ -9,14 +9,14 @@
 NAMESPACES
 using mt::util::Random;
 
-void Random::seed() {
-    seed((int)(SysTime().total_ms() * SysTime().total_ms() * SysTime().total_ms()));
+bool Random::seed() {
+    return seed((int)(SysTime().total_ms() * SysTime().total_ms() * SysTime().total_ms()));
 }
 
-void Random::seed(const unsigned int _seed) {
+bool Random::seed(const unsigned int _seed) {
     std::srand(_seed);
-//    Logger::print(INFO_, "random seed ..... ( %u )", seed);
-//    cout << "random seed ..... ( " << seed << " )" << endl;
+    Logger::log(INFO_LOG, "random seed ..... ( %u )", _seed);
+    return true;
 }
 
 bool Random::r_bool(const float _true_odds) {

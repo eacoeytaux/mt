@@ -11,7 +11,8 @@ class TerrainVertex;
 class TerrainEdge {
 public:
     friend class Terrain;
-    TerrainEdge(shared_ptr<TerrainVertex> v1, shared_ptr<TerrainVertex> v2, float resistance = 0.99);
+    virtual ~TerrainEdge() { }
+    TerrainEdge(shared_ptr<TerrainVertex> v1, shared_ptr<TerrainVertex> v2, float resistance = 0.1);
     TerrainEdge(const TerrainEdge &);
     
     Line line() const;

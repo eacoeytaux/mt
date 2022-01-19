@@ -11,32 +11,36 @@ namespace exst {
 /// @brief a living, moving object
 class Mob : public Object {
 public:
-    Mob(World * world, const Coordinate & center, const float width, const float height);
+    virtual ~Mob() { }
+    Mob(World * world, const Coordinate & center, const float width, const float height, uint health);
     
     virtual void update(float dt = 1);
     virtual void draw(const Camera *) const;
+#ifdef MT_DEBUG
+    virtual void draw_debug(const Camera *) const;
+#endif
     
     /// @return whether mob is alive
     virtual bool alive() const;
     virtual void kill();
     
     /// @return mob's current health
-    virtual int health() const;
+    virtual uint health() const;
     /// @param health mob's new health
-    virtual void health(int health); // will increase max health if necessary
+    virtual void health(uint health); // will increase max health if necessary
     /// @param percentage sets new health to percentage of maximum health
     virtual void health(float percentage);
 
     /// @param health amount to heal by
-    virtual void heal(int health);
+    virtual void heal(uint health);
     virtual void heal_full();
     /// @param health amount of health lost
-    virtual void hurt(int health);
+    virtual void hurt(uint health);
     
     /// @return mob's maximum health
-    virtual int max_health() const;
+    virtual uint max_health() const;
     /// @param health new maximum health
-    virtual void max_health(int health); // will decrease health if necessary
+    virtual void max_health(uint health); // will decrease health if necessary
     
 protected:
     /// @brief make any altercations to velocity
@@ -49,7 +53,7 @@ protected:
     
 private:
     bool m_alive = true;
-    Slider<int> m_health;
+    Slider<uint> m_health;
 };
 
 }

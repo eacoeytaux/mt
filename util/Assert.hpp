@@ -22,18 +22,18 @@ private:
             static int breakpoint = 0;
             if (breakpoint) { }
 #ifdef MT_DEBUG
-            cout << "assert failed!" << endl;
+            Logger::log(ERROR_LOG, "assert failed! \"%s\"", message);
 #endif
         }
         
-        if (!b && strlen(message)) Logger::print(ERROR_LOG, message, args);
+        if (!b && strlen(message)) Logger::log(ERROR_LOG, message, args);
         assert(b);
         if (quit) exit(quit);
         return b;
     }
     
 public:
-    virtual ~Assert() { } // TODO apply to all ugh
+    virtual ~Assert() { }
     Assert();
     
     /// @brief checks that must be true for code to run properly
@@ -70,6 +70,19 @@ public:
         va_end(va_args);
 #endif
         return b;
+    }
+    
+    /// @brief asserts false where todos exist in code
+    /// @param message description of check
+    /// @return false
+    static bool TODO(const char * message = "", ...) {
+#ifdef MT_DEBUG
+        va_list va_args;
+        va_start(va_args, message);
+        check(false, message, va_args);
+        va_end(va_args);
+#endif
+        return false;
     }
 };
 

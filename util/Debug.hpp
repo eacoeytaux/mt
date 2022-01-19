@@ -1,7 +1,8 @@
 #ifndef Debug_hpp
 #define Debug_hpp
 
-#define MT_DEBUG
+// undefine this to remove all debug code from compilation
+ #define MT_DEBUG
 
 namespace mt {
 namespace util {

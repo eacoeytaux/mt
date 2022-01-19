@@ -9,10 +9,14 @@
 namespace mt {
 namespace geometry {
 
+const float PI = 3.141592653589793238463;
+const float RIGHT_ANGLE = (PI / 2);
+
 /// @class Angle
 /// @brief cartesian coordinate angle
 class Angle {
 public:
+    virtual ~Angle() { }
     /// @param radians radians
     /// @param truncate whether or not radians in confined to [0, 2*pi)
     Angle(const float radians = 0, const bool truncate = true);

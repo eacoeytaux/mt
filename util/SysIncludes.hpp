@@ -13,6 +13,7 @@
 namespace mt {
 
 // general
+using std::exception;
 using std::shared_ptr;
 using std::string;
 using std::uint64_t;
@@ -27,7 +28,6 @@ using std::acos;
 using std::atan;
 using std::atan2;
 
-const float PI = M_PI; // 3.141592653589793238463
 const float POS_INFINITY = std::numeric_limits<float>::max();
 const float NEG_INFINITY = std::numeric_limits<float>::min();
 

@@ -10,7 +10,10 @@ namespace geometry {
 
 class Triangle : public Shape {
 public:
+    virtual ~Triangle() { }
+    /// @brief counter-clockwise
     Triangle(const Coordinate & c1 = Coordinate(0, 0), const Coordinate & c2 = Coordinate(0, 0), const Coordinate & c3 = Coordinate(0, 0));
+    /// @brief counter-clockwise
     Triangle(const Vector & offset1, const Vector & offset2, const Vector & offset3, const Coordinate & origin);
     
     Coordinate c1() const;
@@ -26,10 +29,12 @@ public:
     varray<Triangle> triangles() const override;
     
     float area() const override;
-    int sides() const override;
+    uint sides() const override;
     
     Shape & move(const Vector &) override;
-    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & scale(float scale, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & rotate(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & mirror(const Vector & axis) override;
     
     Triangle operator+(const Vector &) const;
     Triangle & operator+=(const Vector &);

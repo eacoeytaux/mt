@@ -9,7 +9,7 @@ namespace mt {
 
 const float METER = 48;
 const Vector GRAVITY = Vector(0, -2.5);
-const float AIR_RESISTANCE = 0.99;
+const float AIR_RESISTANCE = 0.001;
 
 }
 

@@ -10,6 +10,7 @@ namespace geometry {
 
 class Line {
 public:
+    virtual ~Line() { }
     Line(const Coordinate & c1, const Coordinate & c2);
     
     Coordinate c1() const;
@@ -18,7 +19,10 @@ public:
     void c2(const Coordinate &);
     Angle angle() const;
     
-    void rotate_around_origin(const Angle &, const Coordinate & = Coordinate(0, 0));
+    void rotate(const Angle &, const Coordinate & = Coordinate(0, 0));
+    void mirror(const Vector & axis);
+    void mirror_x();
+    void mirror_y();
     
     bool vertical() const;
     bool horizontal() const;

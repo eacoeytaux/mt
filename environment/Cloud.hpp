@@ -17,12 +17,12 @@ private:
     };
     
 public:
-    Cloud(World*);
+    virtual ~Cloud() { }
+    Cloud(World *);
     
-    float max_dx() const;
-    float max_dy() const;
+    static float max_dx();
+    static float max_dy();
     
-    void update(float dt = 1);
     void draw(const Camera *) const;
     
 private:

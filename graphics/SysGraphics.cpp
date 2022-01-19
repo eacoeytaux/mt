@@ -3,38 +3,66 @@
 #define GL_SILENCE_DEPRECATION
 
 #if defined(__APPLE__)
-#include <GLUT/glut.h>
+#include <SDL2/SDL.h>
 #else
-#include <GL/glut.h>
 #endif
 
 NAMESPACES
 using mt::graphics::SysGraphics;
 
-void glColor(const Color & _color) {
-    glColor4f(_color.r() / 255.f, _color.g() / 255.f, _color.b() / 255.f, _color.a() / 255.f);
+SDL_Window * WINDOW;
+uint32_t WINDOW_WIDTH;
+uint32_t WINDOW_HEIGHT;
+SDL_Renderer * RENDERER;
+
+static GRAPHICS_SETTINGS SETTINGS;
+
+GRAPHICS_SETTINGS SysGraphics::fanciness() {
+    return SETTINGS;
 }
 
-GLint * glCoordinate(const Coordinate & _coor) {
-    static GLint glCoor[2];
-    glCoor[0] = _coor.x();
-    glCoor[1] = _coor.y();
-    return glCoor;
+bool SysGraphics::set_blend_normal() {
+    SDL_SetRenderDrawBlendMode(RENDERER, SDL_BLENDMODE_BLEND);
+    return true;
 }
 
-#ifdef MT_DEBUG
-void SysGraphics::draw_vector(const Color & _color, const Vector & _vector, const unsigned int _thickness, const unsigned int _arrow_shaft_length, const unsigned int _arrow_head_length) {
-    Vector vector = _vector;
-    vector.magnitude(_arrow_shaft_length);
-    draw_rectangle(_color, Rectangle(vector.magnitude(), _thickness, (vector / 2).destination(), vector.angle()));
-    draw_rectangle(_color, Rectangle(_arrow_head_length + (_thickness * 2), _thickness, vector.destination() - Vector(vector.angle() + (PI / 4), _arrow_head_length - _thickness), vector.angle() + (PI / 4)));
-    draw_rectangle(_color, Rectangle(_arrow_head_length + (_thickness * 2), _thickness, vector.destination() - Vector(vector.angle() - (PI / 4), _arrow_head_length - _thickness), vector.angle() - (PI / 4)));
+bool SysGraphics::set_blend_add() {
+    SDL_SetRenderDrawBlendMode(RENDERER, SDL_BLENDMODE_ADD);
+    return true;
 }
-#endif
+
+bool SysGraphics::show_cursor(const bool _show) {
+    if (_show) SDL_ShowCursor(SDL_ENABLE);
+    else SDL_ShowCursor(SDL_DISABLE);
+    return true;
+}
+
+bool SysGraphics::start(uint32_t _width, uint32_t _height) {
+    WINDOW_WIDTH = _width;
+    WINDOW_HEIGHT = _height;
+    WINDOW = SDL_CreateWindow("MT", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    RENDERER = SDL_CreateRenderer(WINDOW, -1, 0);
+    return set_blend_normal() && show_cursor(false);
+}
+
+bool SysGraphics::clear(const Color & _color) {
+    SDL_SetRenderDrawColor(RENDERER, _color.r(), _color.g(), _color.b(), SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(RENDERER);
+    return true;
+}
+
+bool SysGraphics::render() {
+    SDL_RenderPresent(RENDERER);
+    return true;
+}
+
+bool SysGraphics::close() {
+    return true;
+}
 
 void SysGraphics::draw_line(const Color & _color, const Line & _line, const unsigned int _thickness) {
     Vector line_vector(_line.c1(), _line.c2());
-    draw_rectangle(_color, Rectangle(line_vector.magnitude(), _thickness, (line_vector / 2).destination(), _line.angle()));
+    draw_polygon(_color, Rectangle(line_vector.magnitude(), _thickness, (line_vector / 2).destination(), _line.angle()));
 }
 
 void SysGraphics::draw_lines(const Color & _color, const varray<Line> & _lines, const unsigned int _thickness) {
@@ -55,83 +83,91 @@ void SysGraphics::draw_triangle(const Color & _color, const Triangle & _triangle
 void SysGraphics::draw_triangle(const Colors & _colors, const Triangle & _triangle, const unsigned int _thickness) {
     Assert::debug(_colors.size() == 3, "Triangle Colors size (%i) does not = 3", _colors.size());
     if (!_thickness) { // draw filled
-        glBegin(GL_TRIANGLES);
-        glColor(_colors[0]);
-        glVertex2iv(glCoordinate(_triangle.c1()));
-        glColor(_colors[1]);
-        glVertex2iv(glCoordinate(_triangle.c2()));
-        glColor(_colors[2]);
-        glVertex2iv(glCoordinate(_triangle.c3()));
-        glEnd();
+        uint32_t vert_count = 3;
+        SDL_Vertex vert[vert_count];
+        
+        vert[0].position.x = _triangle.c1().x();
+        vert[0].position.y = WINDOW_HEIGHT - _triangle.c1().y();
+        vert[0].color.r = _colors[0].r();
+        vert[0].color.g = _colors[0].g();
+        vert[0].color.b = _colors[0].b();
+        vert[0].color.a = _colors[0].a();
+        
+        vert[1].position.x = _triangle.c2().x();
+        vert[1].position.y = WINDOW_HEIGHT - _triangle.c2().y();
+        vert[1].color.r = _colors[1].r();
+        vert[1].color.g = _colors[1].g();
+        vert[1].color.b = _colors[1].b();
+        vert[1].color.a = _colors[1].a();
+        
+        vert[2].position.x = _triangle.c3().x();
+        vert[2].position.y = WINDOW_HEIGHT - _triangle.c3().y();
+        vert[2].color.r = _colors[2].r();
+        vert[2].color.g = _colors[2].g();
+        vert[2].color.b = _colors[2].b();
+        vert[2].color.a = _colors[2].a();
+        
+        SDL_RenderGeometry(RENDERER, NULL, vert, vert_count, NULL, 0);
     } else {
         draw_lines(_colors, _triangle.lines(), _thickness);
     }
 }
 
-void SysGraphics::draw_rectangle(const Color & _color, const Rectangle & _rectangle, const unsigned int _thickness) {
-    draw_rectangle(varray<Color>(4, _color), _rectangle, _thickness);
-}
-
-void SysGraphics::draw_rectangle(const Colors & _colors, const Rectangle & _rectangle, const unsigned int _thickness) {
-    Assert::debug(_colors.size() == 4, "Rectangle Colors size (%i) does not = 4", _colors.size());
-    if (!_thickness) { // draw filled
-        glBegin(GL_QUADS);
-        glColor(_colors[0]);
-        glVertex2iv(glCoordinate(_rectangle.top_right()));
-        glColor(_colors[1]);
-        glVertex2iv(glCoordinate(_rectangle.bottom_right()));
-        glColor(_colors[2]);
-        glVertex2iv(glCoordinate(_rectangle.bottom_left()));
-        glColor(_colors[3]);
-        glVertex2iv(glCoordinate(_rectangle.top_left()));
-        glEnd();
-    } else {
-        draw_lines(_colors, _rectangle.lines(), _thickness);
-    }
-}
-
-void SysGraphics::draw_square(const Color & _color, const Square & _square, const unsigned int _thickness) {
-    draw_rectangle(_color, _square, _thickness);
-}
-
-void SysGraphics::draw_square(const Colors & _colors, const Square & _square, const unsigned int _thickness) {
-    draw_rectangle(_colors, _square, _thickness);
-}
-
+//void SysGraphics::draw_rectangle(const Color & _color, const Rectangle & _rectangle, const unsigned int _thickness) {
+//    draw_rectangle(varray<Color>(4, _color), _rectangle, _thickness);
+//}
+//
+//void SysGraphics::draw_rectangle(const Colors & _colors, const Rectangle & _rectangle, const unsigned int _thickness) {
+//    Assert::debug(_colors.size() == 4, "Rectangle Colors size (%i) does not = 4", _colors.size());
+//    if (!_thickness) { // draw filled
+//        varray<Coordinate> rect_coors = _rectangle.coordinates();
+//        draw_triangle({ _colors[0], _colors[1], _colors[2] }, Triangle({ rect_coors[0], rect_coors[1], rect_coors[2] }));
+//        draw_triangle({ _colors[2], _colors[3], _colors[0] }, Triangle({ rect_coors[2], rect_coors[3], rect_coors[0] }));
+//    } else {
+//        draw_lines(_colors, _rectangle.lines(), _thickness);
+//    }
+//}
+//
+//void SysGraphics::draw_square(const Color & _color, const Square & _square, const unsigned int _thickness) {
+//    draw_rectangle(_color, _square, _thickness);
+//}
+//
+//void SysGraphics::draw_square(const Colors & _colors, const Square & _square, const unsigned int _thickness) {
+//    draw_rectangle(_colors, _square, _thickness);
+//}
+//
 void SysGraphics::draw_polygon(const Color & _color, const Polygon & _polygon, const unsigned int _thickness) {
     Colors colors;
     for_range (_polygon.coordinates().size()) colors.push_back(_color);
     draw_polygon(colors, _polygon, _thickness);
 }
-    
+
 void SysGraphics::draw_polygon(const Colors & _colors, const Polygon & _polygon, const unsigned int _thickness) {
     Assert::debug(_colors.size() == _polygon.coordinates().size(), "Polygon Colors size (%i) does not = Polygon varray<Line> size (%i)", _colors.size(), _polygon.coordinates().size());
     if (!_thickness) { // draw filled
-        glBegin(GL_POLYGON);
-        for_range (_polygon.coordinates().size()) {
-            glColor(_colors[i]);
-            glVertex2iv(glCoordinate(_polygon.coordinates()[i]));
+        for_range (_polygon.triangles().size()) {
+            Triangle triangle = _polygon.triangles()[i];
+            draw_triangle({ _colors[0], _colors[i + 1], _colors[i + 2] }, triangle);
         }
-        glEnd();
     } else { // draw outline
         draw_lines(_colors, _polygon.lines(), _thickness);
     }
 }
-
-void SysGraphics::draw_circle(const Color & _color, const Circle & _circle, const unsigned int _thickness) {
-    draw_polygon(_color, Polygon(_circle), _thickness);
-}
-
-void SysGraphics::draw_circle(const Colors & _colors, const Circle & _circle, const unsigned int _thickness) {
-    draw_polygon(_colors, Polygon(_circle), _thickness);
-}
-
-void SysGraphics::draw_shape(const Color & _color, const Shape & _shape, const unsigned int _thickness) {
-    Colors colors;
-    for_range (_shape.coordinates().size()) colors.push_back(_color);
-    draw_shape(colors, _shape, _thickness);
-}
-
-void SysGraphics::draw_shape(const Colors & _colors, const Shape & _shape, const unsigned int _thickness) {
-    draw_polygon(_colors, Polygon(_shape.coordinates()), _thickness);
-}
+//
+//void SysGraphics::draw_circle(const Color & _color, const Circle & _circle, const unsigned int _thickness) {
+//    draw_polygon(_color, Polygon(_circle), _thickness);
+//}
+//
+//void SysGraphics::draw_circle(const Colors & _colors, const Circle & _circle, const unsigned int _thickness) {
+//    draw_polygon(_colors, Polygon(_circle), _thickness);
+//}
+//
+//void SysGraphics::draw_shape(const Color & _color, const Shape & _shape, const unsigned int _thickness) {
+//    Colors colors;
+//    for_range (_shape.coordinates().size()) colors.push_back(_color);
+//    draw_shape(colors, _shape, _thickness);
+//}
+//
+//void SysGraphics::draw_shape(const Colors & _colors, const Shape & _shape, const unsigned int _thickness) {
+//    draw_polygon(_colors, Polygon(_shape.coordinates()), _thickness);
+//}

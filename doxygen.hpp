@@ -1,20 +1,4 @@
-#ifndef mt_main_hpp
-#define mt_main_hpp
-
-#include "util/mt.hpp"
-
-namespace mt {
-
-/// @class MTAPP
-/// @brief actual game application
-class MTAPP {
-public:
-    /// @brief run game
-    static void run();
-    /// @brief shutdown application
-    /// @param exitcode exit code for application
-    static void shutdown(int exitcode = 0);
-};
+#include "mt.hpp"
 
 /// @mainpage mt
 /// @section intro_sec Introduction
@@ -45,19 +29,17 @@ public:
 /// \n
 /// L - toggle the lights
 /// \n
+/// \ - toggle cursor
+/// \n
 /// ? - toggle debug mode
 /// \n
-/// < - zoom out
+/// . - zoom out
 /// \n
-/// > - zoom in
+/// , - zoom in
 /// @section install_sec Installation
 /// @subsection Mac OSX
-/// OpenGL and GLUT come installed
+/// install SDL2 framework
 /// \n
-/// go to Project -> Build Phases -> Link Binary With Library and add OpenGL and GLUT
+/// go to Project -> Build Phases -> Link Binary With Library and add SDL
 /// @subsection Windows 10
 /// just give up...
-
-}
-
-#endif /* mt_main_hpp */

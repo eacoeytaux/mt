@@ -12,7 +12,8 @@ namespace exst {
 /// @brief most background visual layer
 class Sky : public Object {
 public:
-    Sky(World*, int cloud_regen_rate = 0);
+    virtual ~Sky() { }
+    Sky(World *, int cloud_regen_rate = 0);
     
     void update(float dt = 1);
     void draw(const Camera *) const;

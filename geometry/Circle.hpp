@@ -15,6 +15,7 @@ class Triangle;
 
 class Circle : public Shape {
 public:
+    virtual ~Circle() { }
     Circle(float radius = 0, const Coordinate & center = Coordinate());
     
     Coordinate center() const;
@@ -25,14 +26,16 @@ public:
     Circle & diameter(float diameter);
     
     Shape & move(const Vector & vector) override;
-    Shape & rotate_about(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & scale(float scale, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & rotate(const Angle & angle, const Coordinate & origin = Coordinate(0, 0)) override;
+    Shape & mirror(const Vector & axis) override;
     
     float lower_bound_x() const;
     float lower_bound_y() const;
     float upper_bound_x() const;
     float upper_bound_y() const;
     float area() const override;
-    int sides() const override;
+    uint sides() const override;
     
     bool contains(const Coordinate &) const;
     

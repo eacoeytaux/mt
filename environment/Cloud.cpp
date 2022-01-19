@@ -25,14 +25,9 @@ Cloud::_puff::_puff(float _RADIUS, const Vector & _center_offset) {
     m_center_offset = _center_offset;
 }
 
-Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
+Cloud::Cloud(World * _world) : Object(_world, Matter(Coordinate(), { Rectangle(max_dx(), max_dy()) })) {
     gravity_ratio(0);
-    
-    Object::width(max_dx());
-    Object::height(max_dy());
     Object::z(0.1);
-    
-    Random::seed();
     
     // set location
     float x = max_dx();
@@ -56,27 +51,22 @@ Cloud::Cloud(World* _world) : Object(_world, Coordinate()) {
     }
 }
 
-float Cloud::max_dx() const {
+float Cloud::max_dx() {
     return max((MAX_SMALL_PUFF_DISTANCE * X_STRETCH) + MAX_SMALL_PUFF_RADIUS, (MAX_LARGE_PUFF_DISTANCE * X_STRETCH) + MAX_LARGE_PUFF_RADIUS) * 2;
 }
 
-float Cloud::max_dy() const {
+float Cloud::max_dy() {
     return max(MAX_SMALL_PUFF_RADIUS + MAX_SMALL_PUFF_DISTANCE, MAX_LARGE_PUFF_RADIUS + MAX_LARGE_PUFF_DISTANCE) * 2;
-}
-
-void Cloud::update(float dt) {
-    move(dt);
 }
 
 void Cloud::draw(const Camera * _camera) const {
     Object::draw(_camera);
     
     for_each (puff, m_puffs) {
-        _camera->draw_circle(WHITE, Circle(puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
-//        _camera->draw_rectangle(WHITE, Rectangle(puff.m_radius, puff.m_radius, position() + puff.m_center_offset), FILLED, m_z);
+        _camera->draw_shape(WHITE, Circle(puff.m_radius, position() + puff.m_center_offset), FILLED, z());
+        
     }
     for_each (puff, m_puffs) {
-        _camera->draw_circle(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, m_z);
-//        _camera->draw_rectangle(INSIDE_COLOR, Rectangle(puff.m_radius * PUFF_OUTLINE_RATIO, puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, m_z);
+        _camera->draw_shape(INSIDE_COLOR, Circle(puff.m_radius * PUFF_OUTLINE_RATIO, position() + puff.m_center_offset), FILLED, z());
     }
 }

@@ -3,7 +3,7 @@
 
 #include "mt.hpp"
 #include "Geometry.hpp"
-#include "Mass.hpp"
+#include "Matter.hpp"
 #include "Joint.hpp"
 
 #endif /* Physics_hpp */

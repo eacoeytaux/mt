@@ -10,10 +10,14 @@ namespace exst {
 
 class Fire : public Object {
 public:
-    Fire(World*, const Coordinate & center);
+    virtual ~Fire() { }
+    Fire(World *, const Coordinate & center);
     
-    void update(float dt = 1);
-    void draw(const Camera *) const;
+    void update(float dt = 1) override;
+    void draw(const Camera *) const override;
+    
+    float visible_width() const override;
+    float visible_height() const override;
     
 private:
     struct Flame;
@@ -26,17 +30,18 @@ private:
     
     struct Flame {
     public:
-        Flame(const Coordinate & offset, const float radius);
+        Flame(const float radius, const Coordinate & offset = Coordinate(0, 0));
         Coordinate offset;
         float radius;
     };
     
     struct Smoke {
     public:
-        Smoke(const Coordinate & offset, const float radius, const uint16_t alpha);
+        Smoke(const float radius, const Coordinate & offset = Coordinate(0, 0));
         Coordinate offset;
         float radius;
-        uint16_t alpha;
+        bool alpha_growing = true;
+        uint16_t alpha = 0;
     };
 };
 

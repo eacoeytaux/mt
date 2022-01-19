@@ -12,12 +12,12 @@ Rectangle::Rectangle(const float _width, const float _height, const Coordinate &
     center(_center);
     width(_width);
     height(_height);
-    rotate_about(_rotation, center());
+    rotate(_rotation, center());
 }
 
-Rectangle::Rectangle(const Coordinate & _c1, const Coordinate & _c2, const Angle & _rotation) {
-    Coordinate c1 = _c1;
-    Coordinate c2 = _c2;
+Rectangle::Rectangle(const Coordinate & _farthest, const Coordinate & _closest, const Angle & _rotation) {
+    Coordinate c1 = _farthest;
+    Coordinate c2 = _closest;
     Vector v1 = Vector(c1);
     Vector v2 = Vector(c2);
     
@@ -70,9 +70,29 @@ Shape & Rectangle::move(const Vector & _v) {
     return *this;
 }
 
-Shape & Rectangle::rotate_about(const Angle & _angle, const Coordinate & _origin) {
-    center(center().rotate_about(_angle, _origin));
+Shape & Rectangle::scale(float _scale, const Coordinate & _origin) {
+    width(width() * _scale);
+    height(height() * _scale);
+    center((Vector(center()) * _scale).destination());
+    return *this;
+}
+
+Shape & Rectangle::rotate(const Angle & _angle, const Coordinate & _origin) {
+    center(center().rotate(_angle, _origin));
     m_rotation += _angle;
+    return *this;
+}
+
+Shape & Rectangle::mirror(const Vector & _axis) {
+    // align with x axis
+    m_center -= _axis.origin();
+    m_center.rotate(_axis.angle() * -1);
+    // mirror
+    m_center.y(m_center.y() * -1);
+    m_rotation *= -1;
+    // align with original axis
+    m_center.rotate(_axis.angle());
+    m_center += _axis.origin();
     return *this;
 }
 
@@ -80,7 +100,7 @@ float Rectangle::area() const {
     return width() * height();
 }
 
-int Rectangle::sides() const {
+uint Rectangle::sides() const {
     return 4;
 }
 
@@ -227,16 +247,6 @@ Line Rectangle::intersection(const Line & _line) const {
     return Line(Coordinate(NEG_INFINITY, NEG_INFINITY), Coordinate(NEG_INFINITY, NEG_INFINITY));
 }
 
-bool Rectangle::intersects(const Rectangle & _rectangle) const {
-    // TODO
-    return false;
-}
-
-bool Rectangle::intersects(const Circle & _circle) const {
-    // TODO
-    return false;
-}
-
 varray<Coordinate> Rectangle::coordinates() const {
     return { top_right(), top_left(), bottom_left(), bottom_right() };
 }
@@ -246,7 +256,7 @@ varray<Line> Rectangle::lines() const {
 }
 
 varray<Triangle> Rectangle::triangles() const {
-    return { Triangle(top_right(), bottom_right(), top_left()), Triangle(bottom_left(), top_left(), bottom_right()) };
+    return { Triangle(top_left(), bottom_left(), top_right()), Triangle(bottom_left(), bottom_right(), top_right()) };
 }
 
 Rectangle::RectangleSplit::RectangleSplit() :

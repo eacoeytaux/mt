@@ -11,11 +11,31 @@ using mt::geometry::Polygon;
 Polygon::Polygon(const varray<Coordinate> & _coordinates) :
 m_coordinates(_coordinates) {
     m_coordinates = _coordinates;
-    for_each (coordinate, _coordinates) {
-        m_lower_bound_x = min<float>(lower_bound_x(), coordinate.x());
-        m_lower_bound_y = min<float>(lower_bound_y(), coordinate.y());
-        m_upper_bound_x = max<float>(lower_bound_x(), coordinate.x());
-        m_upper_bound_x = max<float>(lower_bound_y(), coordinate.y());
+    m_convex = true;
+    
+    if (_coordinates.size()) {
+        m_lower_bound_x = min<float>(lower_bound_x(), _coordinates[0].x());
+        m_lower_bound_y = min<float>(lower_bound_y(), _coordinates[0].y());
+        m_upper_bound_x = max<float>(lower_bound_x(), _coordinates[0].x());
+        m_upper_bound_x = max<float>(lower_bound_y(), _coordinates[0].y());
+        
+        m_lower_bound_x = min<float>(lower_bound_x(), _coordinates[1].x());
+        m_lower_bound_y = min<float>(lower_bound_y(), _coordinates[1].y());
+        m_upper_bound_x = max<float>(lower_bound_x(), _coordinates[1].x());
+        m_upper_bound_x = max<float>(lower_bound_y(), _coordinates[1].y());
+        
+        for_range (_coordinates.size()) {
+            m_lower_bound_x = min<float>(lower_bound_x(), _coordinates[i].x());
+            m_lower_bound_y = min<float>(lower_bound_y(), _coordinates[i].y());
+            m_upper_bound_x = max<float>(lower_bound_x(), _coordinates[i].x());
+            m_upper_bound_x = max<float>(lower_bound_y(), _coordinates[i].y());
+            
+            if ((i != 0) && (i != 1)) {
+                Angle angle1 = Vector(_coordinates[i - 2], _coordinates[i - 1]).angle();
+                Angle angle2 = Vector(_coordinates[i - 2], _coordinates[i]).angle();
+                if (angle2 < angle1) m_convex = false;
+            }
+        }
     }
 }
 
@@ -62,10 +82,28 @@ Shape & Polygon::move(const Vector & _vector) {
     return *this;
 }
 
-Shape & Polygon::rotate_about(const Angle & _angle, const Coordinate & _origin) {
+Shape & Polygon::scale(float _scale, const Coordinate & _origin) {
     varray<Coordinate> new_coordinates;
     for_each (coordinate, coordinates()) {
-        new_coordinates.push_back(coordinate.rotate_about(_angle, _origin));
+        new_coordinates.push_back((Vector(coordinate) * _scale).destination());
+    }
+    *this = Polygon(new_coordinates);
+    return *this;
+}
+    
+Shape & Polygon::rotate(const Angle & _angle, const Coordinate & _origin) {
+    varray<Coordinate> new_coordinates;
+    for_each (coordinate, coordinates()) {
+        new_coordinates.push_back(coordinate.rotate(_angle, _origin));
+    }
+    *this = Polygon(new_coordinates);
+    return *this;
+}
+
+Shape & Polygon::mirror(const Vector & _axis) {
+    varray<Coordinate> new_coordinates;
+    for_each (coordinate, coordinates()) {
+        new_coordinates.push_back(coordinate.mirror(_axis));
     }
     *this = Polygon(new_coordinates);
     return *this;
@@ -79,8 +117,12 @@ float Polygon::area() const {
     return ret;
 }
 
-int Polygon::sides() const {
-    return (int)coordinates().size();
+uint Polygon::sides() const {
+    return (uint)coordinates().size();
+}
+
+bool Polygon::convex() const {
+    return m_convex;
 }
 
 float Polygon::lower_bound_x() const {
@@ -116,7 +158,15 @@ varray<Line> Polygon::lines() const {
 }
 
 varray<Triangle> Polygon::triangles() const {
-    return varray<Triangle>(); // TODO
+    varray<Triangle> triangles;
+    varray<Coordinate> coordinates = Polygon::coordinates();
+    Coordinate base_coordinate = coordinates[0];
+    for_range (coordinates.size()) {
+        if ((i == 0) || (i == 1)) continue;
+        triangles.push_back(Triangle(base_coordinate, coordinates[i - 1], coordinates[i] ));
+    } // TODO concave
+    
+    return triangles;
 }
 
 Polygon Polygon::operator+(const Vector & _v) const {

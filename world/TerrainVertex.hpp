@@ -11,6 +11,7 @@ class TerrainEdge;
 class TerrainVertex {
 public:
     friend class Terrain;
+    virtual ~TerrainVertex() { }
     TerrainVertex(const Coordinate & pos);
     
     Coordinate position() const;

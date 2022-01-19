@@ -3,21 +3,23 @@
 
 #include "mt.hpp"
 #include "Mob.hpp"
-#include "Rope.hpp"
+#include "HookRope.hpp"
+#include "Hook.hpp"
 
 namespace mt {
 namespace exst {
 
 class Player : public Mob {
 public:
-    Player(World*, const Coordinate & center);
+    virtual ~Player() { }
+    Player(World *, const Coordinate & center);
     
     void update(float dt = 1) override;
     void draw(const Camera *) const override;
     void draw_reticle(const Camera *) const;
     
     void kill() override;
-    void hurt(int health) override;
+    void hurt(uint health) override;
     
     void moving_right(bool);
     void moving_left(bool);
@@ -41,6 +43,7 @@ private:
     void draw_front_leg(const Camera *) const;
     void draw_back_arm(const Camera *) const;
     void draw_back_leg(const Camera *) const;
+    void draw_boot(const Camera *, const Coordinate & foot_position) const;
     void draw_accessories(const Camera *) const;
     
     bool m_moving_right = false;
@@ -58,8 +61,8 @@ private:
     Angle m_aim_angle = 0;
     bool m_firing_hook = false;
     bool m_firing_arrow = false;
-    
-    Rope m_rope;
+    Hook m_hook;
+    HookRope m_rope;
     float m_rope_max_length;
     float m_hook_growth_speed;
     float m_hook_retract_speed;
@@ -72,7 +75,7 @@ public:
     void god(bool);
 private:
     /// @brief whether or not player is an indestructible god
-    static bool god_mode;
+    bool god_mode = true;
 #endif
 };
 

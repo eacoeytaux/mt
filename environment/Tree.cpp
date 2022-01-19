@@ -15,11 +15,9 @@ const float LEAVES_SHRINK_RATIO = 0.64;
 const Color TRUNK_COLOR = Color(165, 100, 6);
 const Color LEAVES_COLOR = Color(0, 192, 0);
 
-Tree::Tree(World* _world, const Coordinate & _root) : Object(_world, _root, 0, 0, 0.999) { }
+Tree::Tree(World * _world, const Coordinate & _root) : Object(_world, Matter(_root), 0.999) { }
 
 void Tree::draw(const Camera * _camera) const {
-    Random::seed(0); // TODO
-    
     Coordinate base = position();
     Angle sway_angle = Angle(sin(m_world->age() / 40.0) * MAX_SWAY.radians());
     Vector trunk(Vector(base, base + Vector(sway_angle + (PI / 2), TRUNK_HEIGHT)));
@@ -31,8 +29,8 @@ void Tree::draw(const Camera * _camera) const {
         Vector sub_trunk(Vector(top, top + Vector((sway_angle * (i + 2)) + (PI / 2), 100.0 * shink_ratio)));
         // base leaves triangle
         Polygon leaves = Polygon(varray<Vector>({ Coordinate(0, 0), Coordinate(-LEAVES_HEIGHT_BASE_LENGTH * shink_ratio / 2, -LEAVES_HEIGHT_BASE_LENGTH * shink_ratio), Coordinate(LEAVES_HEIGHT_BASE_LENGTH * shink_ratio / 2, -LEAVES_HEIGHT_BASE_LENGTH * shink_ratio) }), sub_trunk.destination());
-        leaves.rotate_about(sway_angle * (i + 2), leaves.coordinates()[0]);
-        _camera->draw_polygon(LEAVES_COLOR, leaves);
+        leaves.rotate(sway_angle * (i + 2), leaves.coordinates()[0]);
+        _camera->draw_shape(LEAVES_COLOR, leaves);
         
         top = sub_trunk.destination();
         shink_ratio *= LEAVES_SHRINK_RATIO;

@@ -15,6 +15,7 @@ const unsigned int FILLED = 0;
 /// @brief color defined in red, green, blue, and alpha
 class Color {
 public:
+    virtual ~Color() { }
     /// @param r red [0, 255]
     /// @param g green [0, 255]
     /// @param b blue [0, 255]

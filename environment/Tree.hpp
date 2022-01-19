@@ -9,7 +9,8 @@ namespace exst {
 
 class Tree : public Object {
 public:
-    Tree(World*, const Coordinate & root);
+    virtual ~Tree() { }
+    Tree(World *, const Coordinate & root);
     
     void draw(const Camera *) const;
 };

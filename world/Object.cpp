@@ -10,18 +10,31 @@ const float SHADOW_ALPHA = 64;
 const float SHADOW_WIDTH_SCALE = 0.36; // (0, 1]
 const float SHADOW_THICKNESS = 4;
 
-Object::Object(World* _world, const Coordinate & _position, const float _width, const float _height, const float _z, const Vector & _velocity) {
+#ifdef MT_DEBUG
+const float VELOCITY_SCALE = 3;
+const float HIT_BOX_THICKNESS = 1;
+const Color HIT_BOX_COLOR = YELLOW;
+const float VISABLE_BOX_THICKNESS = 1;
+const Color VISABLE_BOX_COLOR = RED;
+#endif
+
+static uint64_t total_ids = 0;
+
+Object::Object(World * _world, const Matter & _matter, const float _z) :
+Matter(_matter),
+m_id(total_ids++) {
     m_world = _world;
-    layer_position(1);
-    width(_width);
-    height(_height);
     z(_z);
-    position(_position);
-    velocity(_velocity);
-    m_casts_shadow = true;
+    
+    // defaults
+//    layer_position(1);
     m_terrarin_boundaries = true;
 }
 
+void Object::update_object(float dt) {
+    update(dt);
+}
+    
 void Object::update(float dt) {
     update_move(dt);
 }
@@ -31,7 +44,7 @@ void Object::update_move(float dt) {
 }
 
 void Object::adjust_velocity(float dt) {
-    Vector velocity = Mass::velocity();
+    Vector velocity = Matter::velocity();
     
     if (m_ground && m_terrarin_boundaries) {
         Angle ground_angle = m_ground->line().angle();
@@ -42,9 +55,9 @@ void Object::adjust_velocity(float dt) {
         velocity += (GRAVITY * m_gravity_ratio);
     }
     
-    velocity *= resistance();
+    velocity *= 1 - friction_resistance();
     
-    Mass::velocity(velocity);
+    Matter::velocity(velocity);
 }
 
 void Object::move(float dt) {
@@ -71,9 +84,9 @@ void Object::move(float dt) {
             if (terrain_edge == m_ground) continue;
             
             Line movement_line = Line(center, center + velocity);
-            if (movement_line.intersects(terrain_edge->line() + Vector(0, height() / 2))) {
+            if (movement_line.intersects(terrain_edge->line() + Vector(0, space().height() / 2))) {
                 next_ground = terrain_edge;
-                Coordinate intersection = movement_line.intersection(terrain_edge->line() + Vector(0, height() / 2));
+                Coordinate intersection = movement_line.intersection(terrain_edge->line() + Vector(0, space().height() / 2));
                 movement = Vector(center, intersection);
                 movement_percentage = 0;
                 if (movement.magnitude()) movement_percentage = movement.magnitude() / velocity.magnitude();
@@ -81,42 +94,48 @@ void Object::move(float dt) {
                 remaining.rotate(terrain_edge->line().angle() * -1);
                 remaining.dy(0);
                 remaining.rotate(terrain_edge->line().angle());
-                Object::velocity(remaining * (1 - movement_percentage));
+                remaining *= (1 - movement_percentage);
+                remaining /= dt;
+                Object::velocity();
             }
         }
     }
     
     if (m_ground && next_ground == m_ground) {
         if ((velocity.dx() > 0) && (center + velocity).x() > m_ground->line().right().x()) {
-            movement = m_ground->vertex2()->position() - center + Vector(0, height() / 2);
+            movement = m_ground->vertex2()->position() - center + Vector(0, space().height() / 2);
             movement_percentage = 0;
             if (movement.magnitude())
                 movement_percentage = movement.magnitude() / velocity.magnitude();
             remaining = velocity - movement;
             if (m_ground->vertex2()->edge2()) {
                 next_ground = m_ground->vertex2()->edge2();
-//                remaining.rotate(next_ground->line().angle() * -1);
-//                remaining.dy(0);
-//                remaining.rotate(next_ground->line().angle());
+                remaining.rotate(next_ground->line().angle() * -1);
+                remaining.dy(0);
+                remaining.rotate(next_ground->line().angle());
             } else {
                 next_ground = nullptr;
             }
-            Object::velocity(remaining * (1 - movement_percentage));
+            remaining *= (1 - movement_percentage);
+            remaining /= dt;
+            Object::velocity();
         } else if ((velocity.dx() < 0) && (center + velocity).x() < m_ground->line().left().x()) {
-            movement = m_ground->vertex1()->position() - center + Vector(0, height() / 2);
+            movement = m_ground->vertex1()->position() - center + Vector(0, space().height() / 2);
             movement_percentage = 0;
             if (movement.magnitude())
                 movement_percentage = movement.magnitude() / velocity.magnitude();
             remaining = velocity - movement;
             if (m_ground->vertex1()->edge1()) {
                 next_ground = m_ground->vertex1()->edge1();
-//                remaining.rotate(next_ground->line().angle() * -1);
-//                remaining.dy(0);
-//                remaining.rotate(next_ground->line().angle());
+                remaining.rotate(next_ground->line().angle() * -1);
+                remaining.dy(0);
+                remaining.rotate(next_ground->line().angle());
             } else {
                 next_ground = nullptr;
             }
-            Object::velocity(remaining * (1 - movement_percentage));
+            remaining *= (1 - movement_percentage);
+            remaining /= dt;
+            Object::velocity();
         }
     }
     
@@ -128,51 +147,51 @@ void Object::move(float dt) {
     }
 }
 
-float Object::resistance() const {
+float Object::friction_resistance() const {
     if (m_terrarin_boundaries && m_ground) {
         return m_ground->resistance();
     }
     return AIR_RESISTANCE;
 }
 
-void Object::draw(const Camera * _camera) const {
-    if (m_casts_shadow) draw_shadow(_camera);
+void Object::draw_object(const Camera * _camera) const {
+    draw(_camera);
 }
 
-void Object::draw_shadow(const Camera * _camera) const {
-    if (m_ground) {
-        Coordinate base = position() - Vector(0, height() / 2);
-        Line shadow = Line(base - Vector(m_ground->line().angle(), (width() / 2) * SHADOW_WIDTH_SCALE), base + Vector(m_ground->line().angle(), (width() / 2) * SHADOW_WIDTH_SCALE));
-//        _camera->draw_line(Color(BLACK, SHADOW_ALPHA), shadow, SHADOW_THICKNESS);
-        
-        // TODO split on vertex
-    }
-    
-    // TODO above ground
+void Object::draw(const Camera * _camera) const {
+    return;
 }
 
 #ifdef MT_DEBUG
-void Object::draw_visable_box(const Camera * _camera) const {
-    if (m_width && m_height) {
-        _camera->draw_polygon(Color(BLACK, 64), visable_box(), 2 / _camera->zoom(), m_z);
+void Object::draw_debug(const Camera * _camera) const {
+    draw_visible_box(_camera);
+    draw_hit_box(_camera);
+    // center
+    _camera->draw_shape(HIT_BOX_COLOR, Circle((VISABLE_BOX_THICKNESS * 2 / _camera->zoom()), position()));
+    // velocity
+    Vector velocity_graphic = velocity().origin(position()) * VELOCITY_SCALE;
+    if (velocity_graphic.magnitude() > 1) _camera->draw_vector(HIT_BOX_COLOR, velocity_graphic, HIT_BOX_THICKNESS, velocity_graphic.magnitude(), 10);
+}
+
+void Object::draw_hit_box(const Camera * _camera) const {
+    if (hit_box().area()) {
+        _camera->draw_shape(HIT_BOX_COLOR, hit_box(), HIT_BOX_THICKNESS);
+    }
+}
+
+void Object::draw_visible_box(const Camera * _camera) const {
+    if (visible_box().area()) {
+        _camera->draw_shape(VISABLE_BOX_COLOR, visible_box(), VISABLE_BOX_THICKNESS);
     }
 }
 #endif
 
 float Object::width() const {
-    return m_width;
-}
-
-void Object::width(const float _width) {
-    m_width = _width;
+    return space().width();
 }
 
 float Object::height() const {
-    return m_height;
-}
-
-void Object::height(const float _height) {
-    m_height = _height;
+    return space().height();
 }
 
 float Object::z() const {
@@ -181,6 +200,22 @@ float Object::z() const {
 
 void Object::z(const float _z) {
     m_z = _z;
+}
+
+float Object::visible_width() const {
+    return m_visible_width;
+}
+
+void Object::visible_width(const float _visible_width) {
+    m_visible_width = _visible_width;
+}
+
+float Object::visible_height() const {
+    return m_visible_height;
+}
+
+void Object::visible_height(const float _visible_height) {
+    m_visible_height = _visible_height;
 }
 
 bool Object::terrarin_boundaries() const {
@@ -202,6 +237,10 @@ void Object::gravity_ratio(float _gravity_ratio) {
     m_gravity_ratio  = _gravity_ratio;
 }
 
-Rectangle Object::visable_box() const {
-    return Rectangle(width(), height(), position());
+Rectangle Object::hit_box() const {
+    return space();
+}
+
+Rectangle Object::visible_box() const {
+    return Rectangle(visible_width(), visible_height(), position());
 }
